@@ -117,7 +117,14 @@
         "nsis",
         "portable"
       ],
-      "icon": "public/icon.ico"
+      "icon": "public/icon.ico",
+      "signtoolOptions": {
+        "sign": "./scripts/sign-win.cjs",
+        "signingHashAlgorithms": [
+          "sha256"
+        ],
+        "publisherName": "Garimpo"
+      }
     },
     "nsis": {
       "artifactName": "${productName}-Setup-${version}-${arch}.${ext}",
