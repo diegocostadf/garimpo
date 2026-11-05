@@ -12,11 +12,11 @@
     "build": "rm -rf dist dist-electron && vite build && electron-builder",
     "build:vite": "rm -rf dist dist-electron && vite build",
     "build:mac": "rm -rf dist dist-electron && vite build && electron-builder --mac --x64 --arm64 -c.mac.identity=- --publish never",
-    "build:win": "rm -rf dist dist-electron && vite build && electron-builder --win --x64 --ia32 --publish never",
+    "build:win": "rm -rf dist dist-electron && vite build && electron-builder --win --x64 --publish never && electron-builder --win --ia32 --publish never",
     "build:linux": "rm -rf dist dist-electron && vite build && PATH=\"$PWD/scripts/build-tools:$PATH\" electron-builder --linux --x64",
     "build:linux-arm64": "rm -rf dist dist-electron && vite build && PATH=\"$PWD/scripts/build-tools:$PATH\" electron-builder --linux --arm64",
     "build:mac-arm64": "rm -rf dist dist-electron && vite build && electron-builder --mac --arm64 -c.mac.identity=- --publish never",
-    "build:all": "rm -rf dist dist-electron && vite build && electron-builder --mac --x64 --arm64 -c.mac.identity=- --publish never && electron-builder --win --x64 --ia32 --publish never && bun scripts/write-update-feeds.ts",
+    "build:all": "rm -rf dist dist-electron && vite build && electron-builder --mac --x64 --arm64 -c.mac.identity=- --publish never && electron-builder --win --x64 --publish never && electron-builder --win --ia32 --publish never && bun scripts/write-update-feeds.ts",
     "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview",
     "electron:dev": "concurrently \"vite\" \"electron .\"",
@@ -114,20 +114,8 @@
     },
     "win": {
       "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64",
-            "ia32"
-          ]
-        },
-        {
-          "target": "portable",
-          "arch": [
-            "x64",
-            "ia32"
-          ]
-        }
+        "nsis",
+        "portable"
       ],
       "icon": "public/icon.ico"
     },
@@ -156,7 +144,7 @@
       "category": "Audio"
     },
     "dmg": {
-      "sign": true,
+      "sign": false,
       "writeUpdateInfo": false
     },
     "afterAllArtifactBuild": "scripts/after-all-artifacts.cjs",

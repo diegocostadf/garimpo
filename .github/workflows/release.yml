@@ -67,7 +67,7 @@ jobs:
           npx vite build
           if [ -n "$CSC_LINK" ]; then
             NOTARIZE=false; [ -n "$APPLE_ID" ] && NOTARIZE=true
-            npx electron-builder --mac --x64 --arm64 --publish never -c.mac.notarize=$NOTARIZE
+            npx electron-builder --mac --x64 --arm64 --publish never -c.mac.notarize=$NOTARIZE -c.dmg.sign=true
           else
             CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac --x64 --arm64 --publish never -c.mac.identity=-
           fi
@@ -106,7 +106,8 @@ jobs:
           rm -rf dist dist-electron
           npx vite build
           if [ -z "$CSC_LINK" ]; then export CSC_IDENTITY_AUTO_DISCOVERY=false; unset CSC_LINK CSC_KEY_PASSWORD; fi
-          npx electron-builder --win --x64 --ia32 --publish never
+          npx electron-builder --win --x64 --publish never
+          npx electron-builder --win --ia32 --publish never
       - uses: actions/upload-artifact@v4
         with:
           name: windows

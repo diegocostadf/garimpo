@@ -27,7 +27,7 @@ if [ -n "$IDENTITY" ]; then
   echo "Assinando com: $IDENTITY"
   NOTARIZE=false; [ -n "$APPLE_ID" ] && [ -n "$APPLE_TEAM_ID" ] && NOTARIZE=true
   GARIMPO_APPLE_TEAM_ID="$APPLE_TEAM_ID" npx electron-builder --mac --x64 --arm64 --publish never \
-    -c.directories.output="$OUT" -c.mac.notarize=$NOTARIZE
+    -c.directories.output="$OUT" -c.mac.notarize=$NOTARIZE -c.dmg.sign=true
 else
   echo "Nenhum Developer ID encontrado: assinatura ad hoc local."
   CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac --x64 --arm64 --publish never \
