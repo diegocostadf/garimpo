@@ -4,12 +4,15 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/authStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useDownloadStore } from '../stores/downloadStore'
+import { useUpdateStore } from '../stores/updateStore'
 import { useQuality, qualityLabel as labelOf } from '../composables/useQuality'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
 const downloadStore = useDownloadStore()
+const updateStore = useUpdateStore()
+const updateWaiting = computed(() => ['available', 'downloading', 'ready'].includes(updateStore.status.state))
 const isMaximized = ref(false)
 
 // Detect platform - check multiple sources for reliability
@@ -87,6 +90,18 @@ const close = () => window.electronAPI?.close()
       <span class="w-1.5 h-1.5 rounded-full" :class="settingsStore.isQobuzLinked ? 'bg-primary-500' : 'border border-foreground-muted'"></span>
       Qobuz
     </span>
+    <!-- New version: stays visible until installed, even after "Depois" -->
+    <button
+      v-if="updateWaiting"
+      type="button"
+      @click="updateStore.dialogOpen = true"
+      class="no-drag inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full bg-primary-500 text-white"
+      data-testid="update-badge"
+      :aria-label="t('updates.badgeLabel', { version: updateStore.status.latest || '' })"
+    >
+      <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse" aria-hidden="true"></span>
+      {{ updateStore.status.state === 'ready' ? t('updates.badgeReady') : t('updates.badge', { version: updateStore.status.latest || '' }) }}
+    </button>
     <span
       class="hidden sm:inline-flex items-center gap-1.5 h-6 px-2 rounded-full border border-line text-foreground"
       data-testid="quality-badge"

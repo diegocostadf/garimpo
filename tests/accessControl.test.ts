@@ -28,6 +28,10 @@ function backend(opts: { profile?: Profile; down?: boolean } = {}) {
         ? json(200, { access_token: 'AT1', refresh_token: 'RT1', expires_in: 3600, user: { id: 'u1', email: body.email } })
         : json(400, { error: 'invalid_grant' })
     }
+    if (url.endsWith('/auth/v1/signup')) {
+      if (body.email === 'existe@garimpo.app') return json(422, { code: 422, error_code: 'user_already_exists', msg: 'User already registered' })
+      return json(200, { access_token: 'AT0', refresh_token: 'RT0', expires_in: 3600, user: { id: 'u2', email: body.email } })
+    }
     if (url.includes('grant_type=refresh_token')) return json(200, { access_token: 'AT2', refresh_token: 'RT2', expires_in: 3600, user: { id: 'u1', email: 'dj@garimpo.app' } })
     if (url.includes('/rest/v1/profiles')) return json(200, [profile])
     if (url.includes('/rest/v1/access_log')) return new Response('', { status: 201 })
@@ -64,6 +68,8 @@ describe('access control', () => {
     const log = b.calls.find(c => c.url.includes('access_log'))!
     expect(log.body).toMatchObject({ user_id: 'u1', event: 'login', app_version: '0.3.0' })
     expect(log.auth).toBe('Bearer AT1')
+    const signInCall = b.calls.find(c => c.url.includes('grant_type=password'))!
+    expect(signInCall.auth).toBeUndefined()
     const raw = fs.readFileSync(join(dir, 'garimpo-session.bin'), 'utf8')
     expect(raw.startsWith('enc:')).toBe(true)
     expect(raw).not.toContain('RT1')
@@ -106,5 +112,20 @@ describe('access control', () => {
     expect(fs.existsSync(join(dir, 'garimpo-session.bin'))).toBe(false)
     expect(b.calls.some(c => c.body?.event === 'logout')).toBe(true)
     expect(b.calls.some(c => c.url.endsWith('/auth/v1/logout'))).toBe(true)
+  })
+
+  test('sign up with e-mail and password logs in right away, with the app as source', async () => {
+    const b = backend()
+    const ac = new AccessControl(b.fake)
+    const s = await ac.signUp('novo@garimpo.app', 'senha123', 'Novo DJ')
+    expect(s).toMatchObject({ signedIn: true, user: { email: 'novo@garimpo.app' } })
+    const call = b.calls.find(c => c.url.endsWith('/auth/v1/signup'))!
+    expect(call.body).toMatchObject({ email: 'novo@garimpo.app', data: { display_name: 'Novo DJ', signup_source: 'app' } })
+  })
+
+  test('sign up errors: existing e-mail and short password', async () => {
+    const ac = new AccessControl(backend().fake)
+    await expect(ac.signUp('existe@garimpo.app', 'senha123')).rejects.toMatchObject({ code: 'E_EXISTS' })
+    await expect(ac.signUp('x@garimpo.app', '123')).rejects.toMatchObject({ code: 'E_WEAK' })
   })
 })

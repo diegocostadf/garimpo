@@ -52,7 +52,7 @@ interface StoredSession {
 const OFFLINE_GRACE_MS = 7 * 24 * 3600 * 1000
 
 export class AuthError extends Error {
-  constructor(public code: 'E_CREDENTIALS' | 'E_NETWORK' | 'E_BLOCKED' | 'E_EXPIRED' | 'E_PENDING' | 'E_CONFIG' | 'E_RATE' | 'E_UNKNOWN') {
+  constructor(public code: 'E_CREDENTIALS' | 'E_NETWORK' | 'E_BLOCKED' | 'E_EXPIRED' | 'E_PENDING' | 'E_CONFIG' | 'E_RATE' | 'E_EXISTS' | 'E_WEAK' | 'E_CONFIRM' | 'E_UNKNOWN') {
     super(code)
   }
 }
@@ -106,7 +106,9 @@ export class AccessControl {
         method: init.method || 'GET',
         headers: {
           apikey: key,
-          Authorization: `Bearer ${init.token || key}`,
+          // New Supabase publishable keys (sb_publishable_…) are not JWTs: send them only as
+          // apikey; Authorization carries the user's access token when there is one.
+          ...(init.token ? { Authorization: `Bearer ${init.token}` } : /^eyJ/.test(key) ? { Authorization: `Bearer ${key}` } : {}),
           'Content-Type': 'application/json',
           ...(init.prefer ? { Prefer: init.prefer } : {})
         },
@@ -120,6 +122,10 @@ export class AccessControl {
     let data: any = null
     try { data = text ? JSON.parse(text) : null } catch { data = text }
     if (!res.ok) {
+      const msg = String((data && (data.msg || data.error_description || data.message || data.error_code || data.error)) || '')
+      if (/already (been )?registered|user_already_exists|email_exists/i.test(msg)) throw new AuthError('E_EXISTS')
+      if (/password/i.test(msg) && /(weak|short|at least|characters)/i.test(msg)) throw new AuthError('E_WEAK')
+      if (/email not confirmed|email_not_confirmed/i.test(msg)) throw new AuthError('E_CONFIRM')
       if (res.status === 400 || res.status === 401 || res.status === 403) throw Object.assign(new AuthError('E_CREDENTIALS'), { status: res.status })
       if (res.status === 429) throw new AuthError('E_RATE')
       if (res.status >= 500) throw new AuthError('E_NETWORK')
@@ -204,6 +210,24 @@ export class AccessControl {
     const tokens = await this.call('/auth/v1/token?grant_type=password', { method: 'POST', body: { email: email.trim(), password } })
     const st = await this.adopt(tokens, 'login')
     return st
+  }
+
+  /** Creates an account (no e-mail confirmation: the project auto-confirms) and signs in. */
+  async signUp(email: string, password: string, displayName = ''): Promise<AccessState> {
+    if (!this.enabled) throw new AuthError('E_CONFIG')
+    if (password.length < 6) throw new AuthError('E_WEAK')
+    const res = await this.call('/auth/v1/signup', {
+      method: 'POST',
+      body: { email: email.trim(), password, data: { display_name: displayName.trim(), signup_source: 'app' } }
+    })
+    // Auto-confirm projects return a session right away; otherwise try to sign in.
+    if (res && res.access_token) return this.adopt(res, 'login')
+    try {
+      return await this.signIn(email, password)
+    } catch (e) {
+      if (e instanceof AuthError && e.code === 'E_CREDENTIALS') throw new AuthError('E_CONFIRM')
+      throw e
+    }
   }
 
   async signOut(): Promise<AccessState> {

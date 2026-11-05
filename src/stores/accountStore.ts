@@ -58,6 +58,21 @@ export const useAccountStore = defineStore('account', () => {
     }
   }
 
+  async function signUp(email: string, password: string, name: string) {
+    const a = api()
+    if (!a) return false
+    busy.value = true
+    error.value = null
+    try {
+      const r = await a.signUp(email, password, name)
+      state.value = r.state
+      if (!r.ok) error.value = r.error || 'E_UNKNOWN'
+      return r.ok
+    } finally {
+      busy.value = false
+    }
+  }
+
   async function signOut() {
     const a = api()
     if (!a) return
@@ -88,5 +103,5 @@ export const useAccountStore = defineStore('account', () => {
 
   function logModule(m: ModuleId) { api()?.logModule(m).catch(() => {}) }
 
-  return { state, ready, busy, error, isDev, canUseApp, has, init, signIn, signOut, resetPassword, refresh, logModule }
+  return { state, ready, busy, error, isDev, canUseApp, has, init, signIn, signUp, signOut, resetPassword, refresh, logModule }
 })

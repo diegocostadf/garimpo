@@ -659,6 +659,7 @@ const authResult = async (fn: () => Promise<unknown>) => {
 }
 ipcMain.handle('auth:state', () => authResult(() => accessControl.restore()))
 ipcMain.handle('auth:signIn', (_, email: string, password: string) => authResult(() => accessControl.signIn(String(email || ''), String(password || ''))))
+ipcMain.handle('auth:signUp', (_, email: string, password: string, name: string) => authResult(() => accessControl.signUp(String(email || ''), String(password || ''), String(name || ''))))
 ipcMain.handle('auth:signOut', () => authResult(() => accessControl.signOut()))
 ipcMain.handle('auth:resetPassword', (_, email: string) => authResult(async () => { await accessControl.resetPassword(String(email || '')) }))
 ipcMain.handle('auth:refresh', () => authResult(() => accessControl.refresh()))

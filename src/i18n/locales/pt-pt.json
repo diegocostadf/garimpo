@@ -1286,7 +1286,10 @@
     "everySixHours": "A cada 6 horas",
     "everyDay": "Uma vez por dia",
     "everyLaunch": "Só ao abrir a aplicação",
-    "everyNever": "Nunca"
+    "everyNever": "Nunca",
+    "badge": "Atualizar {version}",
+    "badgeReady": "Reiniciar para atualizar",
+    "badgeLabel": "Nova versão {version} disponível"
   },
   "wizard": {
     "close": "Fechar",
@@ -1571,7 +1574,20 @@
       "E_NETWORK": "Sem conexão com o servidor do Garimpo. Verifique sua internet.",
       "E_RATE": "Muitas tentativas. Espere um minuto e tente de novo.",
       "E_CONFIG": "O login não está configurado nesta versão.",
-      "E_UNKNOWN": "Não foi possível entrar. Tente de novo."
-    }
+      "E_UNKNOWN": "Não foi possível entrar. Tente de novo.",
+      "E_EXISTS": "Este e-mail já tem conta. Entre ou redefina a senha.",
+      "E_WEAK": "Escolha uma senha com pelo menos 6 caracteres.",
+      "E_CONFIRM": "Sua conta foi criada, mas ainda está aguardando confirmação. Tente entrar de novo em instantes."
+    },
+    "signUpTitle": "Crie sua conta",
+    "signUpBody": "Use seu e-mail e uma senha. Você começa a usar o Garimpo na hora.",
+    "name": "Nome",
+    "newPassword": "Senha (mínimo de 6 caracteres)",
+    "confirmPassword": "Confirme a senha",
+    "passwordMismatch": "As senhas não são iguais.",
+    "signUp": "Criar conta",
+    "creating": "Criando…",
+    "haveAccount": "Já tenho conta",
+    "createAccount": "Criar conta"
   }
 }

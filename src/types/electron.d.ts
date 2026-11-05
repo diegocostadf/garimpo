@@ -57,6 +57,7 @@ declare global {
       account: {
         state: () => Promise<AccountResult>
         signIn: (email: string, password: string) => Promise<AccountResult>
+        signUp: (email: string, password: string, name: string) => Promise<AccountResult>
         signOut: () => Promise<AccountResult>
         resetPassword: (email: string) => Promise<AccountResult>
         refresh: () => Promise<AccountResult>

@@ -1286,7 +1286,10 @@
     "everySixHours": "6 saatte bir",
     "everyDay": "Günde bir kez",
     "everyLaunch": "Yalnızca uygulama açılırken",
-    "everyNever": "Asla"
+    "everyNever": "Asla",
+    "badge": "Update {version}",
+    "badgeReady": "Restart to update",
+    "badgeLabel": "New version {version} available"
   },
   "wizard": {
     "close": "Close",
@@ -1571,7 +1574,20 @@
       "E_NETWORK": "No connection to the Garimpo server. Check your internet.",
       "E_RATE": "Too many attempts. Wait a minute and try again.",
       "E_CONFIG": "Login is not configured in this build.",
-      "E_UNKNOWN": "Could not sign in. Try again."
-    }
+      "E_UNKNOWN": "Could not sign in. Try again.",
+      "E_EXISTS": "This email already has an account. Sign in or reset the password.",
+      "E_WEAK": "Choose a password with at least 6 characters.",
+      "E_CONFIRM": "Your account was created, but it is waiting for confirmation. Try signing in again in a moment."
+    },
+    "signUpTitle": "Create your account",
+    "signUpBody": "Use your email and a password. You start using Garimpo right away.",
+    "name": "Name",
+    "newPassword": "Password (at least 6 characters)",
+    "confirmPassword": "Confirm password",
+    "passwordMismatch": "The passwords do not match.",
+    "signUp": "Create account",
+    "creating": "Creating…",
+    "haveAccount": "I already have an account",
+    "createAccount": "Create account"
   }
 }

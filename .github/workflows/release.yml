@@ -12,7 +12,7 @@ name: Release
 #   Windows: with WIN_CERT_P12 (base64 .pfx) and WIN_CERT_PASSWORD the installers are signed;
 #   without them SmartScreen shows "unknown publisher" on first run.
 #
-# Accounts: repository variables GARIMPO_SUPABASE_URL and GARIMPO_SUPABASE_ANON_KEY turn on login.
+# Accounts: the Supabase project of the site is built in (vite.config.ts).
 # Releases repo: variable GARIMPO_RELEASES_REPO (owner/name) publishes to a public releases-only repo
 # (needs the secret RELEASES_TOKEN with contents:write on that repo).
 
@@ -25,8 +25,6 @@ permissions:
   contents: write
 
 env:
-  GARIMPO_SUPABASE_URL: ${{ vars.GARIMPO_SUPABASE_URL }}
-  GARIMPO_SUPABASE_ANON_KEY: ${{ vars.GARIMPO_SUPABASE_ANON_KEY }}
   GARIMPO_RELEASES_REPO: ${{ vars.GARIMPO_RELEASES_REPO || github.repository }}
   GARIMPO_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 

@@ -12,7 +12,11 @@ const account = useAccountStore()
 const email = ref('')
 const password = ref('')
 const show = ref(false)
-const view = ref<'login' | 'reset' | 'resetSent'>('login')
+const view = ref<'login' | 'signup' | 'reset' | 'resetSent'>('login')
+const name = ref('')
+const confirm = ref('')
+const mismatch = computed(() => view.value === 'signup' && confirm.value.length > 0 && confirm.value !== password.value)
+const canSignUp = computed(() => /.+@.+\..+/.test(email.value.trim()) && password.value.length >= 6 && confirm.value === password.value && !account.busy)
 
 const blocked = computed(() => account.state.signedIn && account.state.reason)
 const canSubmit = computed(() => /.+@.+\..+/.test(email.value.trim()) && password.value.length >= 6 && !account.busy)
@@ -23,6 +27,15 @@ async function submit() {
   const ok = await account.signIn(email.value, password.value)
   if (ok) password.value = ''
 }
+async function submitSignUp() {
+  if (!canSignUp.value) return
+  const ok = await account.signUp(email.value, password.value, name.value)
+  if (ok) { password.value = ''; confirm.value = '' }
+}
+function go(v: 'login' | 'signup' | 'reset') {
+  account.error = null
+  view.value = v
+}
 async function sendReset() {
   if (!/.+@.+\..+/.test(email.value.trim())) return
   if (await account.resetPassword(email.value)) view.value = 'resetSent'
@@ -30,7 +43,7 @@ async function sendReset() {
 </script>
 
 <template>
-  <div class="fixed inset-0 z-[100] bg-background-main text-foreground flex">
+  <div class="fixed inset-x-0 bottom-0 top-10 z-[100] bg-background-main text-foreground flex">
     <!-- brand side -->
     <section class="hidden lg:flex flex-1 flex-col justify-between p-12 border-r border-line relative overflow-hidden">
       <div class="flex items-center gap-3">
@@ -71,6 +84,35 @@ async function sendReset() {
       </div>
 
       <!-- Reset password -->
+      <!-- Create account -->
+      <form v-else-if="view === 'signup'" class="flex flex-col gap-4" @submit.prevent="submitSignUp" data-testid="signup-form">
+        <span class="font-mono text-[11px] uppercase text-foreground-muted">{{ t('account.label') }}</span>
+        <h2 class="text-3xl font-semibold">{{ t('account.signUpTitle') }}</h2>
+        <p class="text-sm text-foreground-muted">{{ t('account.signUpBody') }}</p>
+        <label class="flex flex-col gap-2">
+          <span class="font-mono text-[11px] uppercase text-foreground-muted">{{ t('account.name') }}</span>
+          <input v-model="name" type="text" autocomplete="name" class="h-14 px-6 rounded-full bg-surface border border-line focus:border-foreground outline-none" />
+        </label>
+        <label class="flex flex-col gap-2">
+          <span class="font-mono text-[11px] uppercase text-foreground-muted">{{ t('account.email') }}</span>
+          <input v-model="email" type="email" autocomplete="email" required class="h-14 px-6 rounded-full bg-surface border border-line focus:border-foreground outline-none" />
+        </label>
+        <label class="flex flex-col gap-2">
+          <span class="font-mono text-[11px] uppercase text-foreground-muted">{{ t('account.newPassword') }}</span>
+          <input v-model="password" type="password" autocomplete="new-password" required minlength="6" class="h-14 px-6 rounded-full bg-surface border border-line focus:border-foreground outline-none" />
+        </label>
+        <label class="flex flex-col gap-2">
+          <span class="font-mono text-[11px] uppercase text-foreground-muted">{{ t('account.confirmPassword') }}</span>
+          <input v-model="confirm" type="password" autocomplete="new-password" required class="h-14 px-6 rounded-full bg-surface border outline-none" :class="mismatch ? 'border-primary-500' : 'border-line focus:border-foreground'" />
+        </label>
+        <p v-if="mismatch" class="text-sm text-primary-400" role="alert">{{ t('account.passwordMismatch') }}</p>
+        <p v-else-if="errorText" class="text-sm text-primary-400" role="alert">{{ errorText }}</p>
+        <button type="submit" :disabled="!canSignUp" class="h-14 rounded-full bg-primary-500 text-white font-mono text-[11px] uppercase disabled:opacity-40">
+          {{ account.busy ? t('account.creating') : t('account.signUp') }}
+        </button>
+        <button type="button" @click="go('login')" class="self-start font-mono text-[11px] uppercase text-foreground-muted hover:text-foreground">{{ t('account.haveAccount') }}</button>
+      </form>
+
       <form v-else-if="view !== 'login'" class="flex flex-col gap-5" @submit.prevent="sendReset">
         <span class="font-mono text-[11px] uppercase text-foreground-muted">{{ t('account.resetLabel') }}</span>
         <h2 class="text-3xl font-semibold">{{ t('account.resetTitle') }}</h2>
@@ -84,7 +126,7 @@ async function sendReset() {
           <button type="submit" :disabled="account.busy" class="h-14 rounded-full bg-primary-500 text-white font-mono text-[11px] uppercase disabled:opacity-40">{{ t('account.sendReset') }}</button>
         </template>
         <p v-else class="p-5 rounded-[20px] bg-surface border border-line leading-relaxed">{{ t('account.resetSent', { email }) }}</p>
-        <button type="button" @click="view = 'login'" class="self-start font-mono text-[11px] uppercase text-foreground-muted hover:text-foreground">← {{ t('account.backToLogin') }}</button>
+        <button type="button" @click="go('login')" class="self-start font-mono text-[11px] uppercase text-foreground-muted hover:text-foreground">← {{ t('account.backToLogin') }}</button>
       </form>
 
       <!-- Sign in -->
@@ -106,9 +148,9 @@ async function sendReset() {
         <button type="submit" :disabled="!canSubmit" class="h-14 rounded-full bg-primary-500 text-white font-mono text-[11px] uppercase disabled:opacity-40">
           {{ account.busy ? t('account.signingIn') : t('account.signIn') }}
         </button>
-        <div class="flex items-center justify-between">
-          <button type="button" @click="view = 'reset'" class="font-mono text-[11px] uppercase text-foreground-muted hover:text-foreground">{{ t('account.forgot') }}</button>
-          <span class="text-xs text-foreground-muted">{{ t('account.noAccess') }}</span>
+        <div class="flex items-center justify-between gap-3">
+          <button type="button" @click="go('reset')" class="font-mono text-[11px] uppercase text-foreground-muted hover:text-foreground">{{ t('account.forgot') }}</button>
+          <button type="button" @click="go('signup')" class="h-10 px-4 rounded-full border border-line-strong font-mono text-[11px] uppercase hover:bg-hover" data-testid="go-signup">{{ t('account.createAccount') }}</button>
         </div>
       </form>
     </section>

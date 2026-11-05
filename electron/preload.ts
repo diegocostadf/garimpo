@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   account: {
     state: () => ipcRenderer.invoke('auth:state'),
     signIn: (email: string, password: string) => ipcRenderer.invoke('auth:signIn', email, password),
+    signUp: (email: string, password: string, name: string) => ipcRenderer.invoke('auth:signUp', email, password, name),
     signOut: () => ipcRenderer.invoke('auth:signOut'),
     resetPassword: (email: string) => ipcRenderer.invoke('auth:resetPassword', email),
     refresh: () => ipcRenderer.invoke('auth:refresh'),
@@ -197,6 +198,7 @@ declare global {
       account: {
         state: () => Promise<AccountResult>
         signIn: (email: string, password: string) => Promise<AccountResult>
+        signUp: (email: string, password: string, name: string) => Promise<AccountResult>
         signOut: () => Promise<AccountResult>
         resetPassword: (email: string) => Promise<AccountResult>
         refresh: () => Promise<AccountResult>

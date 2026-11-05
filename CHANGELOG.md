@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0] - 2026-11-05
+
+### Added
+- Conta Garimpo obrigatória: para usar o app é preciso entrar com e-mail e senha. Cadastro direto no app ou no site, sem confirmação por e-mail.
+- O app usa o mesmo backend do site: acessos, versão e sistema de cada usuário aparecem na área administrativa.
+- Selo "Atualizar" no topo do app quando há versão nova, que continua visível depois de "Depois" até a atualização ser instalada.
+
 ## [0.3.0] - 2026-11-05
 
 ### Added
