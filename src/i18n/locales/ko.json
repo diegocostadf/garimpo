@@ -1267,7 +1267,7 @@
     "skip": "이 버전 건너뛰기",
     "hide": "숨기기",
     "downloading": "업데이트 다운로드 중… {percent}%",
-    "ready": "버전 {version}이(가) 준비되었습니다. 다시 시작하면 업데이트가 완료됩니다.",
+    "ready": "Version {version} has been downloaded. Restart to install it.",
     "busyWarning": "아직 다운로드가 진행 중입니다. 지금 다시 시작하면 중단됩니다.",
     "restartNow": "지금 다시 시작",
     "restartLater": "나중에 다시 시작",
@@ -1277,10 +1277,9 @@
     "checkFailed": "업데이트를 확인할 수 없습니다.",
     "statusAvailable": "버전 {version}을(를) 사용할 수 있습니다.",
     "skipped": "버전 {version}을(를) 건너뛰었습니다.",
-    "manualUnsigned": "On this Mac the new version is installed by hand: download it, open the file and drag Garimpo to Applications, replacing the old one.",
-    "manualReadonly": "앱이 자체 폴더에 쓸 수 없으므로 릴리스 페이지에서 새 버전을 다운로드하세요.",
-    "manualUnsupported": "이 설치본은 자동으로 업데이트되지 않습니다. 릴리스 페이지나 패키지 관리자에서 새 버전을 받으세요.",
-    "manualFailed": "업데이트를 설치할 수 없습니다: {error}. 릴리스 페이지에서 다운로드할 수 있습니다.",
+    "manualReadonly": "The app cannot write to its own folder. Download the new version from your account on the site.",
+    "manualUnsupported": "This installation does not update itself. Download the new version from your account on the site.",
+    "manualFailed": "The update could not be installed: {error}. You can download it from your account on the site.",
     "every": "업데이트 확인",
     "everyHour": "매시간",
     "everySixHours": "6시간마다",
@@ -1289,7 +1288,9 @@
     "everyNever": "안 함",
     "badge": "Update {version}",
     "badgeReady": "Restart to update",
-    "badgeLabel": "New version {version} available"
+    "badgeLabel": "New version {version} available",
+    "readyInstaller": "Version {version} has been downloaded. We will open the installer: drag Garimpo to Applications, replacing the old one.",
+    "openInstaller": "Open installer"
   },
   "wizard": {
     "close": "Close",
@@ -1589,5 +1590,50 @@
     "creating": "Creating…",
     "haveAccount": "I already have an account",
     "createAccount": "Create account"
+  },
+  "onboarding": {
+    "steps": {
+      "garimpo": "Garimpo account",
+      "deezer": "Deezer",
+      "qobuz": "Qobuz",
+      "spotify": "Spotify"
+    },
+    "required": "Required",
+    "optional": "Optional",
+    "progress": "Step {n} of {total}",
+    "continue": "Continue",
+    "skip": "Skip for now",
+    "connected": "Connected",
+    "later": "Later, in Settings",
+    "switchAccount": "Switch account",
+    "deezer": {
+      "title": "Connect your Deezer account",
+      "body": "Garimpo searches and downloads through your Deezer account. The app does not work without it, so this step is required.",
+      "expired": "Your Deezer session expired. Sign in again to keep using Garimpo.",
+      "why": "You sign in on Deezer's own site, in a secure window. Your password never goes through Garimpo.",
+      "doneTitle": "Deezer connected",
+      "doneBody": "Your account is all set. If you like, connect Qobuz and Spotify too."
+    },
+    "qobuz": {
+      "title": "Connect Qobuz",
+      "body": "With a Qobuz subscription you download in high resolution (Hi-Res). If you do not have one, skip: you can connect later in Settings.",
+      "connect": "Sign in with Qobuz",
+      "waiting": "Waiting for the Qobuz sign in…",
+      "failed": "Could not connect to Qobuz.",
+      "doneTitle": "Qobuz connected",
+      "doneBody": "Hi-Res downloads are unlocked."
+    },
+    "spotify": {
+      "title": "Connect Spotify",
+      "body": "To bring Spotify playlists into Garimpo. The assistant creates the access keys on Spotify's site with you. You can also do it later.",
+      "connect": "Connect Spotify",
+      "doneTitle": "Spotify connected",
+      "doneBody": "Your Spotify playlists can now be converted."
+    },
+    "done": {
+      "title": "All set",
+      "body": "Garimpo is ready. You can change these connections any time in Settings.",
+      "start": "Start using Garimpo"
+    }
   }
 }

@@ -17,6 +17,7 @@ export default defineConfig({
             __GARIMPO_SUPABASE_URL__: JSON.stringify(process.env.GARIMPO_SUPABASE_URL ?? 'https://xcrfninptolspzsovhkl.supabase.co'),
             __GARIMPO_SUPABASE_ANON_KEY__: JSON.stringify(process.env.GARIMPO_SUPABASE_ANON_KEY ?? 'sb_publishable_5CmBJAicx9jQ5lOTLNe8_Q_4JTvj6zS'),
             __GARIMPO_RELEASES_REPO__: JSON.stringify(process.env.GARIMPO_RELEASES_REPO || 'diegocostadf/garimpo'),
+            __GARIMPO_SITE_URL__: JSON.stringify(process.env.GARIMPO_SITE_URL || 'https://garimpo.diegocosta.digital'),
             __GARIMPO_APPLE_TEAM_ID__: JSON.stringify(process.env.GARIMPO_APPLE_TEAM_ID || '')
           },
           build: {

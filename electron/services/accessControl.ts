@@ -167,7 +167,7 @@ export class AccessControl {
     }
   }
 
-  private async adopt(tokens: any, event: 'login' | 'app_open'): Promise<AccessState> {
+  private async adopt(tokens: any, event: 'login' | 'app_open' | null): Promise<AccessState> {
     const user: AccessUser = { id: tokens.user?.id, email: tokens.user?.email }
     const profile = await this.fetchProfile(tokens.access_token, user.id)
     this.session = {
@@ -180,7 +180,7 @@ export class AccessControl {
     }
     this.offline = false
     this.writeStored(this.session)
-    this.log(event).catch(() => {})
+    if (event) this.log(event).catch(() => {})
     return this.state()
   }
 
@@ -262,6 +262,21 @@ export class AccessControl {
       if (e instanceof AuthError && e.code === 'E_NETWORK') this.offline = true
     }
     return this.state()
+  }
+
+  /** A valid access token for the site's API (refreshed when close to expiry), or null when signed out. */
+  async accessToken(): Promise<string | null> {
+    const s = this.session
+    if (!s || !this.enabled) return null
+    if (s.expires_at - 60 < Date.now() / 1000) {
+      try {
+        const tokens = await this.call('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: s.refresh_token } })
+        await this.adopt(tokens, null)
+      } catch {
+        return null
+      }
+    }
+    return this.session?.access_token ?? null
   }
 
   hasModule(m: string): boolean {

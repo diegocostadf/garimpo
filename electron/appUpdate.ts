@@ -1,22 +1,30 @@
-import { app, autoUpdater as nativeUpdater, BrowserWindow, powerMonitor, shell } from 'electron'
-import { autoUpdater } from 'electron-updater'
-import { execFile } from 'child_process'
+import { app, BrowserWindow, powerMonitor, shell } from 'electron'
+import { execFile, spawn } from 'child_process'
 import { createHash } from 'crypto'
-import { createWriteStream, existsSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'fs'
+import { accessSync, constants, copyFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'fs'
+import { tmpdir } from 'os'
 import { dirname, join, resolve } from 'path'
 import { promisify } from 'util'
-import { installMode, isDeveloperIdSigned, newer, parkedExePath, portableAsset, verifyDigest, type InstallMode, type ManualReason, type ReleaseAsset } from './updatePlan'
+import { accessControl } from './services/accessControl'
+import {
+  installMode, macSwapScript, newer, parkedExePath, safeFileName, updateKey, verifyDownload, WIN_SILENT_ARGS,
+  type InstallMode, type ManualReason, type UpdateFile
+} from './updatePlan'
 
 /**
- * App updates, from GitHub Releases. A check 15 s after launch, then on the schedule the user picked in Settings,
- * again when the machine wakes past the interval, and a manual one from Settings. Results go to the renderer as
- * `update:status`; the renderer owns the Update now / Update later / Skip this version dialog. Nothing is
- * downloaded until the user says so.
+ * App updates, served by the Garimpo site with the signed-in user's token. No public link ever reaches the
+ * person: the app downloads the file itself and installs it.
  *
- * Installing (see updatePlan.installMode): "Update now" downloads with progress, then restarts into the new version.
+ * A check 15 s after launch, then on the schedule picked in Settings, again when the machine wakes past the
+ * interval, and a manual one from Settings. Results go to the renderer as `update:status`; the renderer owns the
+ * Update now / Later / Skip dialog. Nothing is downloaded until the person says so.
+ *
+ * Installing (see updatePlan.installMode):
+ * - Windows Setup: download the new Setup, run it silently on restart; it starts the new version.
+ * - Windows portable: download and swap the exe, relaunch.
+ * - macOS: download the zip, swap the .app on restart and reopen it. A bundle that cannot be replaced gets the
+ *   .dmg in Downloads, opened on restart.
  * If downloads are running it waits and offers "Restart now" instead, so an update never cuts one off.
- * Anything that cannot update in place (ad-hoc Mac builds, .deb, AUR, a read-only portable folder) or whose
- * in-place install failed opens the release page.
  */
 
 export type UpdateSchedule = 'hour' | 'sixHours' | 'day' | 'launch' | 'never'
@@ -28,17 +36,18 @@ export interface UpdateStatus {
   notes?: string
   progress?: number
   error?: string
-  /** Set when "Update now" means opening the release page, and why. */
+  /** Set when "Update now" means opening the download page on the site, and why. */
   manualReason?: ManualReason | 'failed'
+  /** The macOS disk image path: "restart" opens the installer instead of swapping the app. */
+  opensInstaller?: boolean
   /** Downloads are running, so a restart now would interrupt them. */
   busy?: boolean
 }
 
-// Releases repo (owner/name). Set GARIMPO_RELEASES_REPO at build time to
-// publish from a public "releases only" repo while the source stays private.
-declare const __GARIMPO_RELEASES_REPO__: string | undefined
-const REPO = (typeof __GARIMPO_RELEASES_REPO__ !== 'undefined' && /^[\w.-]+\/[\w.-]+$/.test(__GARIMPO_RELEASES_REPO__) ? __GARIMPO_RELEASES_REPO__ : '') || 'diegocostadf/garimpo'
-const RELEASE_URL = `https://github.com/${REPO}/releases/latest`
+declare const __GARIMPO_SITE_URL__: string | undefined
+const SITE = ((typeof __GARIMPO_SITE_URL__ !== 'undefined' && __GARIMPO_SITE_URL__) || 'https://garimpo.diegocosta.digital').replace(/\/+$/, '')
+const DOWNLOAD_PAGE = `${SITE}/conta`
+
 const SCHEDULE_MS: Record<UpdateSchedule, number> = {
   hour: 60 * 60_000,
   sixHours: 6 * 60 * 60_000,
@@ -52,20 +61,19 @@ let schedule: UpdateSchedule = 'launch'
 let timer: NodeJS.Timeout | undefined
 let launchChecked = false
 let resumeHooked = false
-let listenersReady = false
 let lastCheckAt = 0
-/** Assets of the newest release seen by the last check (the portable self-update downloads from these). */
-let latestAssets: ReleaseAsset[] = []
-let latestUrl = RELEASE_URL
+let latestFile: UpdateFile | null = null
 /** Set by "Update now": restart on our own once the download is ready (unless downloads are running). */
 let restartWhenReady = false
-/** An in-place install failed this session: fall back to the release page until the next launch. */
+/** An install failed this session: fall back to the site's download page until the next launch. */
 let inPlaceFailed = false
 let isBusy: () => boolean = () => false
 let modePromise: Promise<InstallMode> | undefined
 let pendingRestart: (() => void) | undefined
 
 const portableExe = process.platform === 'win32' ? process.env.PORTABLE_EXECUTABLE_FILE : undefined
+/** process.execPath = <bundle>.app/Contents/MacOS/Garimpo */
+const macBundle = process.platform === 'darwin' ? resolve(process.execPath, '..', '..', '..') : undefined
 
 /** main.ts tells us whether downloads are running, so a finished update never cuts one off. */
 export function setUpdateBusyCheck(fn: () => boolean): void {
@@ -83,33 +91,29 @@ function dirWritable(dir: string): boolean {
   }
 }
 
-async function macDeveloperIdSigned(): Promise<boolean> {
-  // process.execPath = <bundle>.app/Contents/MacOS/Garimpo
-  const bundle = resolve(process.execPath, '..', '..', '..')
+function bundleWritable(bundle: string): boolean {
   try {
-    const { stdout, stderr } = await promisify(execFile)('/usr/bin/codesign', ['-dv', '--verbose=2', bundle], { timeout: 15000 })
-    return isDeveloperIdSigned(`${stdout}\n${stderr}`)
-  } catch (e) {
-    console.warn('[Update] codesign check failed:', (e as Error).message)
+    accessSync(bundle, constants.W_OK)
+    return dirWritable(dirname(bundle))
+  } catch {
     return false
   }
 }
 
-/** How this build installs updates; computed once (the codesign check takes a moment). */
 function updateInstallMode(): Promise<InstallMode> {
-  return (modePromise ??= (async () => {
+  return (modePromise ??= Promise.resolve().then(() => {
     const mode = installMode({
       platform: process.platform,
       arch: process.arch,
       packaged: app.isPackaged,
       portableExe,
-      developerIdSigned: process.platform === 'darwin' && app.isPackaged ? await macDeveloperIdSigned() : undefined,
       portableDirWritable: portableExe ? dirWritable(dirname(portableExe)) : undefined,
-      appImage: process.env.APPIMAGE
+      macBundle,
+      macBundleWritable: macBundle && app.isPackaged ? bundleWritable(macBundle) : undefined
     })
     console.log(`[Update] install mode: ${mode.kind}${mode.kind === 'manual' ? ` (${mode.reason})` : ''}`)
     return mode
-  })())
+  }))
 }
 
 function set(next: Partial<UpdateStatus>): void {
@@ -123,30 +127,30 @@ export function updateStatus(): UpdateStatus {
   return status
 }
 
-/** Ask GitHub for the latest release. */
+async function authHeaders(): Promise<Record<string, string>> {
+  const token = await accessControl.accessToken()
+  if (!token) throw new Error('sign in to check for updates')
+  return { Authorization: `Bearer ${token}`, 'User-Agent': `Garimpo/${app.getVersion()} (${process.platform}; ${process.arch})` }
+}
+
+/** Ask the site which version is current. */
 export async function checkForUpdate(manual = false): Promise<UpdateStatus> {
   if (status.state === 'checking' || status.state === 'downloading' || status.state === 'ready') return status
   lastCheckAt = Date.now()
   set({ state: 'checking', error: undefined })
   try {
     const mode = await updateInstallMode()
-    const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
-      headers: { Accept: 'application/vnd.github+json', 'User-Agent': `Garimpo/${app.getVersion()}` },
-      signal: AbortSignal.timeout(20000)
-    })
-    if (!res.ok) throw new Error(`GitHub ${res.status}`)
-    const rel = (await res.json()) as { tag_name: string; html_url?: string; body?: string; assets?: ReleaseAsset[] }
-    const latest = rel.tag_name.replace(/^v/, '')
-    latestAssets = rel.assets ?? []
-    latestUrl = rel.html_url?.startsWith(`https://github.com/${REPO}/`) ? rel.html_url : RELEASE_URL
+    const key = updateKey(mode, process.arch) ?? (process.platform === 'darwin' ? (process.arch === 'arm64' ? 'macArm' : 'macIntel') : process.arch === 'ia32' ? 'win32' : 'win64')
+    const res = await fetch(`${SITE}/api/app/latest?key=${encodeURIComponent(key)}`, { headers: await authHeaders(), signal: AbortSignal.timeout(20000) })
+    if (!res.ok) throw new Error(`update server ${res.status}`)
+    const rel = (await res.json()) as { version?: string; notes?: string | null; file?: UpdateFile | null }
+    const latest = String(rel.version || '').replace(/^v/, '')
+    if (!/^\d+\.\d+\.\d+/.test(latest)) throw new Error('update server sent no version')
+    latestFile = rel.file && rel.file.name ? rel.file : null
     if (newer(latest, app.getVersion())) {
       console.log(`[Update] check (${manual ? 'manual' : 'scheduled'}): ${latest} available, running ${app.getVersion()}`)
-      set({
-        state: 'available',
-        latest,
-        notes: rel.body?.slice(0, 4000),
-        manualReason: inPlaceFailed ? 'failed' : mode.kind === 'manual' ? mode.reason : undefined
-      })
+      const manualReason = inPlaceFailed ? 'failed' : mode.kind === 'manual' ? mode.reason : !latestFile ? 'unsupported' : undefined
+      set({ state: 'available', latest, notes: rel.notes?.slice(0, 4000) || undefined, manualReason, opensInstaller: mode.kind === 'macDmg' })
     } else {
       console.log(`[Update] check (${manual ? 'manual' : 'scheduled'}): up to date`)
       set({ state: 'none', latest, notes: undefined, manualReason: undefined })
@@ -158,20 +162,24 @@ export async function checkForUpdate(manual = false): Promise<UpdateStatus> {
   return status
 }
 
-/** "Update now": download and restart into the new version, or open the release page for a manual install. */
+/** "Update now": download and install, or open the site's download page when nothing can install here. */
 export async function installUpdate(): Promise<void> {
   if (status.state === 'ready') return restartNow()
   if (status.state !== 'available') return
   const mode = await updateInstallMode()
-  if (inPlaceFailed || mode.kind === 'manual') {
-    await shell.openExternal(latestUrl)
+  if (inPlaceFailed || mode.kind === 'manual' || !latestFile) {
+    await shell.openExternal(DOWNLOAD_PAGE)
     return
   }
   restartWhenReady = true
   set({ state: 'downloading', progress: 0, error: undefined })
   try {
-    if (mode.kind === 'portable') await downloadPortable()
-    else await downloadWithUpdater()
+    const file = await download(latestFile)
+    if (mode.kind === 'winInstaller') prepareWinInstaller(file)
+    else if (mode.kind === 'portable') preparePortable(file)
+    else if (mode.kind === 'macBundle') await prepareMacBundle(file)
+    else prepareMacDmg(file)
+    downloaded(status.latest ?? '')
   } catch (e) {
     failInPlace(e as Error)
   }
@@ -182,11 +190,11 @@ export function deferRestart(): void {
   restartWhenReady = false
 }
 
-/** An in-place install went wrong: say so, keep the app running, and offer the release page instead. */
 function failInPlace(err: Error): void {
   inPlaceFailed = true
   restartWhenReady = false
-  console.error('[Update] in-place install failed:', err.message)
+  pendingRestart = undefined
+  console.error('[Update] install failed:', err.message)
   set({ state: 'available', progress: undefined, manualReason: 'failed', error: err.message })
 }
 
@@ -198,64 +206,29 @@ function downloaded(version: string): void {
 }
 
 function restartNow(): void {
-  if (status.state !== 'ready') return
-  console.log(`[Update] restarting into ${status.latest}`)
-  if (pendingRestart) return pendingRestart()
-  // Windows installer: silent install, then start the new version. macOS: Squirrel.Mac swaps and relaunches.
-  setImmediate(() => autoUpdater.quitAndInstall(true, true))
+  if (status.state !== 'ready' || !pendingRestart) return
+  console.log(`[Update] installing ${status.latest}`)
+  pendingRestart()
 }
 
-// ---- electron-updater (Windows installer, macOS Developer ID, Linux AppImage) ----
-
-function wireUpdater(): void {
-  if (listenersReady) return
-  listenersReady = true
-  autoUpdater.autoDownload = false
-  autoUpdater.autoInstallOnAppQuit = true
-  // The release ships no blockmaps; always fetch the whole file.
-  autoUpdater.disableDifferentialDownload = true
-  autoUpdater.logger = console
-  autoUpdater.on('download-progress', (p) => set({ state: 'downloading', progress: Math.min(99, Math.round(p.percent)) }))
-  if (process.platform === 'darwin') {
-    // electron-updater reports the zip as downloaded before Squirrel.Mac has taken it and checked its code
-    // signature against this app; ready means Squirrel accepted it, so a mismatch surfaces before any restart.
-    let version = ''
-    autoUpdater.on('update-downloaded', (info) => {
-      version = info.version
-      console.log(`[Update] ${info.version} zip downloaded; handing it to Squirrel.Mac`)
-    })
-    nativeUpdater.on('update-downloaded', () => downloaded(version || status.latest || ''))
-  } else {
-    autoUpdater.on('update-downloaded', (info) => downloaded(info.version))
-  }
-  autoUpdater.on('error', (err) => {
-    if (status.state === 'downloading' || status.state === 'ready') failInPlace(err)
-    else console.warn('[Update] updater error:', err.message)
-  })
+function stagingDir(): string {
+  const dir = join(tmpdir(), 'garimpo-update')
+  mkdirSync(dir, { recursive: true })
+  return dir
 }
 
-async function downloadWithUpdater(): Promise<void> {
-  wireUpdater()
-  const r = await autoUpdater.checkForUpdates()
-  if (!r?.updateInfo || !newer(r.updateInfo.version, app.getVersion())) throw new Error('the release has no update feed for this platform')
-  await autoUpdater.downloadUpdate()
-  // 'update-downloaded' follows; Squirrel.Mac has verified the signature by the time quitAndInstall runs.
-}
-
-// ---- Windows portable self-update ----
-
-async function downloadPortable(): Promise<void> {
-  const exe = portableExe as string
-  const asset = portableAsset(latestAssets, process.arch)
-  if (!asset) throw new Error('the release has no portable build for this machine')
-  const staging = join(dirname(exe), `.${asset.name}.download`)
-  rmSync(staging, { force: true })
-  console.log(`[Update] portable: downloading ${asset.name}`)
-  const res = await fetch(asset.browser_download_url, { headers: { 'User-Agent': `Garimpo/${app.getVersion()}` }, redirect: 'follow' })
-  if (!res.ok || !res.body) throw new Error(`download ${res.status} for ${asset.name}`)
-  const total = Number(res.headers.get('content-length')) || asset.size || 0
+/** Download {site}/api/app/download/{key} with progress and check it against the recorded checksum. */
+async function download(file: UpdateFile, dir = stagingDir()): Promise<string> {
+  const name = safeFileName(file.name)
+  const target = join(dir, name)
+  const partial = `${target}.part`
+  rmSync(partial, { force: true })
+  console.log(`[Update] downloading ${name}`)
+  const res = await fetch(`${SITE}/api/app/download/${encodeURIComponent(file.key)}`, { headers: await authHeaders() })
+  if (!res.ok || !res.body) throw new Error(`download ${res.status}`)
+  const total = Number(res.headers.get('content-length')) || file.size || 0
   const hash = createHash('sha256')
-  const out = createWriteStream(staging)
+  const out = createWriteStream(partial)
   let got = 0
   let lastPct = -1
   try {
@@ -270,15 +243,51 @@ async function downloadPortable(): Promise<void> {
       if (pct !== lastPct) set({ state: 'downloading', progress: (lastPct = pct) })
     }
     await new Promise<void>((ok, fail) => out.end((err?: Error | null) => (err ? fail(err) : ok())))
-    const sha = verifyDigest(hash.digest('hex'), asset.name, asset.digest)
-    console.log(`[Update] portable: ${asset.name} verified, sha256 ${sha}`)
+    const sha = verifyDownload(hash.digest('hex'), got, file)
+    console.log(`[Update] ${name} verified, sha256 ${sha}`)
   } catch (e) {
     out.destroy()
-    rmSync(staging, { force: true })
+    rmSync(partial, { force: true })
     throw e
   }
+  rmSync(target, { force: true })
+  renameSync(partial, target)
+  return target
+}
+
+// ---- Windows Setup ----
+
+function prepareWinInstaller(setupExe: string): void {
+  pendingRestart = () => {
+    try {
+      const child = spawn(setupExe, WIN_SILENT_ARGS, { detached: true, stdio: 'ignore' })
+      child.unref()
+    } catch (e) {
+      failInPlace(e as Error)
+      return
+    }
+    app.quit()
+  }
+}
+
+// ---- Windows portable ----
+
+function preparePortable(downloadedExe: string): void {
+  const exe = portableExe as string
+  const staging = join(dirname(exe), `.${safeFileName(downloadedExe.split(/[\\/]/).pop() || '')}.download`)
+  rmSync(staging, { force: true })
+  renameOrCopy(downloadedExe, staging)
   pendingRestart = () => swapPortableAndRelaunch(exe, staging)
-  downloaded(status.latest ?? '')
+}
+
+function renameOrCopy(from: string, to: string): void {
+  try {
+    renameSync(from, to)
+  } catch {
+    // another drive: copy, then remove the original
+    copyFileSync(from, to)
+    rmSync(from, { force: true })
+  }
 }
 
 function swapPortableAndRelaunch(exe: string, staging: string): void {
@@ -289,11 +298,10 @@ function swapPortableAndRelaunch(exe: string, staging: string): void {
     try {
       renameSync(staging, exe)
     } catch (e) {
-      renameSync(parked, exe) // put the working exe back
+      renameSync(parked, exe)
       throw e
     }
   } catch (e) {
-    pendingRestart = undefined
     rmSync(staging, { force: true })
     failInPlace(e as Error)
     return
@@ -312,11 +320,45 @@ export function cleanupPortableUpdate(): void {
     try {
       rmSync(parked, { force: true })
     } catch {
-      // the old launcher can hold its file for a few seconds after the relaunch
       if (left > 0) setTimeout(() => attempt(left - 1), 10_000)
     }
   }
   attempt(6)
+}
+
+// ---- macOS ----
+
+async function prepareMacBundle(zip: string): Promise<void> {
+  const unpack = join(dirname(zip), `unpacked-${Date.now()}`)
+  rmSync(unpack, { recursive: true, force: true })
+  mkdirSync(unpack, { recursive: true })
+  await promisify(execFile)('/usr/bin/ditto', ['-x', '-k', zip, unpack], { timeout: 180_000 })
+  rmSync(zip, { force: true })
+  const appName = readdirSync(unpack).find((n) => n.endsWith('.app'))
+  if (!appName) throw new Error('the update has no app inside')
+  const newApp = join(unpack, appName)
+  // The new bundle must carry a valid signature before it replaces this one.
+  await promisify(execFile)('/usr/bin/codesign', ['--verify', '--deep', newApp], { timeout: 120_000 })
+  const script = join(dirname(zip), 'swap.sh')
+  writeFileSync(script, macSwapScript(process.pid, macBundle as string, newApp), { mode: 0o755 })
+  pendingRestart = () => {
+    try {
+      spawn('/bin/bash', [script], { detached: true, stdio: 'ignore' }).unref()
+    } catch (e) {
+      failInPlace(e as Error)
+      return
+    }
+    app.quit()
+  }
+}
+
+function prepareMacDmg(dmg: string): void {
+  const dest = join(app.getPath('downloads'), dmg.split('/').pop() as string)
+  rmSync(dest, { force: true })
+  renameOrCopy(dmg, dest)
+  pendingRestart = () => {
+    void shell.openPath(dest).then(() => app.quit())
+  }
 }
 
 /**
@@ -335,7 +377,6 @@ export function scheduleUpdateChecks(every: UpdateSchedule): void {
   if (interval > 0) timer = setInterval(() => void checkForUpdate(false), interval)
   if (!resumeHooked) {
     resumeHooked = true
-    // A laptop asleep for the night should not wait another full interval after it wakes.
     powerMonitor.on('resume', () => {
       const ms = SCHEDULE_MS[schedule]
       if (ms > 0 && Date.now() - lastCheckAt > ms) void checkForUpdate(false)

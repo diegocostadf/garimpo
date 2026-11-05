@@ -7,7 +7,7 @@ const { t } = useI18n()
 const updateStore = useUpdateStore()
 const status = computed(() => updateStore.status)
 
-// Release notes are markdown from GitHub, shown as plain text: never rendered as HTML.
+// Release notes are markdown from the release, shown as plain text: never rendered as HTML.
 const notes = computed(() => (status.value.notes ?? '')
   .replace(/^#{1,6}\s+/gm, '')
   .replace(/^[-*]\s+/gm, '• ')
@@ -17,7 +17,6 @@ const notes = computed(() => (status.value.notes ?? '')
 
 const manualNote = computed(() => {
   switch (status.value.manualReason) {
-    case 'unsigned': return t('updates.manualUnsigned')
     case 'readonly': return t('updates.manualReadonly')
     case 'unsupported': return t('updates.manualUnsupported')
     case 'failed': return t('updates.manualFailed', { error: status.value.error ?? '' })
@@ -84,7 +83,7 @@ const manualNote = computed(() => {
         <template v-else-if="status.state === 'ready'">
           <div class="px-6 pt-6 pb-4 space-y-3">
             <h2 id="update-dialog-title" class="font-display !text-[22px] text-foreground">{{ t('updates.dialogTitle') }}</h2>
-            <p class="text-sm text-foreground-muted">{{ t('updates.ready', { version: status.latest ?? '' }) }}</p>
+            <p class="text-sm text-foreground-muted">{{ t(status.opensInstaller ? 'updates.readyInstaller' : 'updates.ready', { version: status.latest ?? '' }) }}</p>
             <p v-if="status.busy" class="text-sm text-primary-400">{{ t('updates.busyWarning') }}</p>
           </div>
           <div class="px-6 py-4 flex justify-end gap-3 border-t border-line">
@@ -92,7 +91,7 @@ const manualNote = computed(() => {
               {{ t('updates.restartLater') }}
             </button>
             <button class="h-10 px-5 rounded-full bg-primary-500 text-white font-mono text-[11px] uppercase hover:bg-primary-600 transition-colors" @click="updateStore.updateNow()">
-              {{ t('updates.restartNow') }}
+              {{ status.opensInstaller ? t('updates.openInstaller') : t('updates.restartNow') }}
             </button>
           </div>
         </template>

@@ -1267,7 +1267,7 @@
     "skip": "跳过此版本",
     "hide": "隐藏",
     "downloading": "正在下载更新… {percent}%",
-    "ready": "版本 {version} 已准备就绪。重新启动以完成更新。",
+    "ready": "Version {version} has been downloaded. Restart to install it.",
     "busyWarning": "仍有下载正在进行。现在重新启动会中断它们。",
     "restartNow": "立即重新启动",
     "restartLater": "稍后重新启动",
@@ -1277,10 +1277,9 @@
     "checkFailed": "无法检查更新。",
     "statusAvailable": "版本 {version} 现已推出。",
     "skipped": "您已跳过版本 {version}。",
-    "manualUnsigned": "On this Mac the new version is installed by hand: download it, open the file and drag Garimpo to Applications, replacing the old one.",
-    "manualReadonly": "应用无法写入自身文件夹，请从发布页面下载新版本。",
-    "manualUnsupported": "此安装方式不会自动更新。请从发布页面或软件包管理器获取新版本。",
-    "manualFailed": "无法安装更新：{error}。您可以从发布页面下载。",
+    "manualReadonly": "The app cannot write to its own folder. Download the new version from your account on the site.",
+    "manualUnsupported": "This installation does not update itself. Download the new version from your account on the site.",
+    "manualFailed": "The update could not be installed: {error}. You can download it from your account on the site.",
     "every": "检查更新",
     "everyHour": "每小时",
     "everySixHours": "每 6 小时",
@@ -1289,7 +1288,9 @@
     "everyNever": "从不",
     "badge": "Update {version}",
     "badgeReady": "Restart to update",
-    "badgeLabel": "New version {version} available"
+    "badgeLabel": "New version {version} available",
+    "readyInstaller": "Version {version} has been downloaded. We will open the installer: drag Garimpo to Applications, replacing the old one.",
+    "openInstaller": "Open installer"
   },
   "wizard": {
     "close": "Close",
@@ -1589,5 +1590,50 @@
     "creating": "Creating…",
     "haveAccount": "I already have an account",
     "createAccount": "Create account"
+  },
+  "onboarding": {
+    "steps": {
+      "garimpo": "Garimpo account",
+      "deezer": "Deezer",
+      "qobuz": "Qobuz",
+      "spotify": "Spotify"
+    },
+    "required": "Required",
+    "optional": "Optional",
+    "progress": "Step {n} of {total}",
+    "continue": "Continue",
+    "skip": "Skip for now",
+    "connected": "Connected",
+    "later": "Later, in Settings",
+    "switchAccount": "Switch account",
+    "deezer": {
+      "title": "Connect your Deezer account",
+      "body": "Garimpo searches and downloads through your Deezer account. The app does not work without it, so this step is required.",
+      "expired": "Your Deezer session expired. Sign in again to keep using Garimpo.",
+      "why": "You sign in on Deezer's own site, in a secure window. Your password never goes through Garimpo.",
+      "doneTitle": "Deezer connected",
+      "doneBody": "Your account is all set. If you like, connect Qobuz and Spotify too."
+    },
+    "qobuz": {
+      "title": "Connect Qobuz",
+      "body": "With a Qobuz subscription you download in high resolution (Hi-Res). If you do not have one, skip: you can connect later in Settings.",
+      "connect": "Sign in with Qobuz",
+      "waiting": "Waiting for the Qobuz sign in…",
+      "failed": "Could not connect to Qobuz.",
+      "doneTitle": "Qobuz connected",
+      "doneBody": "Hi-Res downloads are unlocked."
+    },
+    "spotify": {
+      "title": "Connect Spotify",
+      "body": "To bring Spotify playlists into Garimpo. The assistant creates the access keys on Spotify's site with you. You can also do it later.",
+      "connect": "Connect Spotify",
+      "doneTitle": "Spotify connected",
+      "doneBody": "Your Spotify playlists can now be converted."
+    },
+    "done": {
+      "title": "All set",
+      "body": "Garimpo is ready. You can change these connections any time in Settings.",
+      "start": "Start using Garimpo"
+    }
   }
 }

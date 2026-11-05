@@ -10,7 +10,8 @@ export interface UpdateStatus {
   notes?: string
   progress?: number
   error?: string
-  manualReason?: 'unsigned' | 'readonly' | 'dev' | 'unsupported' | 'failed'
+  manualReason?: 'readonly' | 'dev' | 'unsupported' | 'failed'
+  opensInstaller?: boolean
   busy?: boolean
 }
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.0] - 2026-11-05
+
+### Added
+- Assistente de primeiro acesso: depois de entrar na conta Garimpo, o app pede o Deezer (obrigatório) e oferece Qobuz e Spotify (opcionais) antes de liberar o uso.
+- Atualização direto no app, no Mac e no Windows (32 e 64 bits, instalador e portátil): o app baixa a nova versão pela sua conta, confere o arquivo e instala sozinho, sem abrir navegador.
+
+### Changed
+- Os instaladores passam a ser entregues só pelo site e pelo app, para quem tem cadastro. Nenhum link externo aparece para o usuário.
+
 ## [0.4.0] - 2026-11-05
 
 ### Added

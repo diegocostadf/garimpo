@@ -1267,7 +1267,7 @@
     "skip": "Παράλειψη αυτής της έκδοσης",
     "hide": "Απόκρυψη",
     "downloading": "Λήψη ενημέρωσης… {percent}%",
-    "ready": "Η έκδοση {version} είναι έτοιμη. Κάντε επανεκκίνηση για να ολοκληρωθεί η ενημέρωση.",
+    "ready": "Version {version} has been downloaded. Restart to install it.",
     "busyWarning": "Εκτελούνται ακόμη λήψεις. Η επανεκκίνηση τώρα θα τις διακόψει.",
     "restartNow": "Επανεκκίνηση τώρα",
     "restartLater": "Επανεκκίνηση αργότερα",
@@ -1277,10 +1277,9 @@
     "checkFailed": "Δεν ήταν δυνατός ο έλεγχος για ενημερώσεις.",
     "statusAvailable": "Η έκδοση {version} είναι διαθέσιμη.",
     "skipped": "Παραλείψατε την έκδοση {version}.",
-    "manualUnsigned": "On this Mac the new version is installed by hand: download it, open the file and drag Garimpo to Applications, replacing the old one.",
-    "manualReadonly": "Η εφαρμογή δεν μπορεί να γράψει στον φάκελό της, οπότε κατεβάστε τη νέα έκδοση από τη σελίδα εκδόσεων.",
-    "manualUnsupported": "Αυτή η εγκατάσταση δεν ενημερώνεται μόνη της. Πάρτε τη νέα έκδοση από τη σελίδα εκδόσεων ή τον διαχειριστή πακέτων σας.",
-    "manualFailed": "Η ενημέρωση δεν εγκαταστάθηκε: {error}. Μπορείτε να την κατεβάσετε από τη σελίδα εκδόσεων.",
+    "manualReadonly": "The app cannot write to its own folder. Download the new version from your account on the site.",
+    "manualUnsupported": "This installation does not update itself. Download the new version from your account on the site.",
+    "manualFailed": "The update could not be installed: {error}. You can download it from your account on the site.",
     "every": "Έλεγχος για ενημερώσεις",
     "everyHour": "Κάθε ώρα",
     "everySixHours": "Κάθε 6 ώρες",
@@ -1289,7 +1288,9 @@
     "everyNever": "Ποτέ",
     "badge": "Update {version}",
     "badgeReady": "Restart to update",
-    "badgeLabel": "New version {version} available"
+    "badgeLabel": "New version {version} available",
+    "readyInstaller": "Version {version} has been downloaded. We will open the installer: drag Garimpo to Applications, replacing the old one.",
+    "openInstaller": "Open installer"
   },
   "wizard": {
     "close": "Close",
@@ -1589,5 +1590,50 @@
     "creating": "Creating…",
     "haveAccount": "I already have an account",
     "createAccount": "Create account"
+  },
+  "onboarding": {
+    "steps": {
+      "garimpo": "Garimpo account",
+      "deezer": "Deezer",
+      "qobuz": "Qobuz",
+      "spotify": "Spotify"
+    },
+    "required": "Required",
+    "optional": "Optional",
+    "progress": "Step {n} of {total}",
+    "continue": "Continue",
+    "skip": "Skip for now",
+    "connected": "Connected",
+    "later": "Later, in Settings",
+    "switchAccount": "Switch account",
+    "deezer": {
+      "title": "Connect your Deezer account",
+      "body": "Garimpo searches and downloads through your Deezer account. The app does not work without it, so this step is required.",
+      "expired": "Your Deezer session expired. Sign in again to keep using Garimpo.",
+      "why": "You sign in on Deezer's own site, in a secure window. Your password never goes through Garimpo.",
+      "doneTitle": "Deezer connected",
+      "doneBody": "Your account is all set. If you like, connect Qobuz and Spotify too."
+    },
+    "qobuz": {
+      "title": "Connect Qobuz",
+      "body": "With a Qobuz subscription you download in high resolution (Hi-Res). If you do not have one, skip: you can connect later in Settings.",
+      "connect": "Sign in with Qobuz",
+      "waiting": "Waiting for the Qobuz sign in…",
+      "failed": "Could not connect to Qobuz.",
+      "doneTitle": "Qobuz connected",
+      "doneBody": "Hi-Res downloads are unlocked."
+    },
+    "spotify": {
+      "title": "Connect Spotify",
+      "body": "To bring Spotify playlists into Garimpo. The assistant creates the access keys on Spotify's site with you. You can also do it later.",
+      "connect": "Connect Spotify",
+      "doneTitle": "Spotify connected",
+      "doneBody": "Your Spotify playlists can now be converted."
+    },
+    "done": {
+      "title": "All set",
+      "body": "Garimpo is ready. You can change these connections any time in Settings.",
+      "start": "Start using Garimpo"
+    }
   }
 }

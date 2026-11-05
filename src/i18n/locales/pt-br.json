@@ -1267,7 +1267,7 @@
     "skip": "Pular esta versão",
     "hide": "Ocultar",
     "downloading": "Baixando atualização… {percent}%",
-    "ready": "A versão {version} está pronta. Reinicie para concluir a atualização.",
+    "ready": "A versão {version} foi baixada. Reinicie para instalar.",
     "busyWarning": "Ainda há downloads em andamento. Reiniciar agora vai interrompê-los.",
     "restartNow": "Reiniciar agora",
     "restartLater": "Reiniciar depois",
@@ -1277,10 +1277,9 @@
     "checkFailed": "Não foi possível verificar atualizações.",
     "statusAvailable": "A versão {version} está disponível.",
     "skipped": "Você pulou a versão {version}.",
-    "manualUnsigned": "Neste Mac a nova versão é instalada manualmente: baixe, abra o arquivo e arraste o Garimpo para Aplicativos, substituindo o antigo.",
-    "manualReadonly": "O app não consegue gravar na própria pasta, então baixe a nova versão na página de lançamentos.",
-    "manualUnsupported": "Esta instalação não se atualiza sozinha. Obtenha a nova versão na página de lançamentos ou no seu gerenciador de pacotes.",
-    "manualFailed": "Não foi possível instalar a atualização: {error}. Você pode baixá-la na página de lançamentos.",
+    "manualReadonly": "O app não consegue gravar na própria pasta. Baixe a nova versão na sua conta do site.",
+    "manualUnsupported": "Esta instalação não se atualiza sozinha. Baixe a nova versão na sua conta do site.",
+    "manualFailed": "Não foi possível instalar a atualização: {error}. Você pode baixá-la na sua conta do site.",
     "every": "Verificar atualizações",
     "everyHour": "A cada hora",
     "everySixHours": "A cada 6 horas",
@@ -1289,7 +1288,9 @@
     "everyNever": "Nunca",
     "badge": "Atualizar {version}",
     "badgeReady": "Reiniciar para atualizar",
-    "badgeLabel": "Nova versão {version} disponível"
+    "badgeLabel": "Nova versão {version} disponível",
+    "readyInstaller": "A versão {version} foi baixada. Vamos abrir o instalador: arraste o Garimpo para Aplicativos, substituindo o antigo.",
+    "openInstaller": "Abrir instalador"
   },
   "wizard": {
     "close": "Fechar",
@@ -1589,5 +1590,50 @@
     "creating": "Criando…",
     "haveAccount": "Já tenho conta",
     "createAccount": "Criar conta"
+  },
+  "onboarding": {
+    "steps": {
+      "garimpo": "Conta Garimpo",
+      "deezer": "Deezer",
+      "qobuz": "Qobuz",
+      "spotify": "Spotify"
+    },
+    "required": "Obrigatório",
+    "optional": "Opcional",
+    "progress": "Etapa {n} de {total}",
+    "continue": "Continuar",
+    "skip": "Pular por agora",
+    "connected": "Conectado",
+    "later": "Depois, em Configurações",
+    "switchAccount": "Trocar de conta",
+    "deezer": {
+      "title": "Conecte sua conta Deezer",
+      "body": "O Garimpo busca e baixa as músicas pela sua conta Deezer. Sem ela o app não funciona, então esta etapa é obrigatória.",
+      "expired": "Sua sessão do Deezer expirou. Entre de novo para continuar usando o Garimpo.",
+      "why": "Você entra no site oficial do Deezer, numa janela segura. Sua senha nunca passa pelo Garimpo.",
+      "doneTitle": "Deezer conectado",
+      "doneBody": "Tudo certo com a sua conta. Agora, se quiser, conecte também o Qobuz e o Spotify."
+    },
+    "qobuz": {
+      "title": "Conecte o Qobuz",
+      "body": "Com uma assinatura Qobuz você baixa em alta resolução (Hi-Res). Se não tiver, pule: dá para conectar depois em Configurações.",
+      "connect": "Entrar com o Qobuz",
+      "waiting": "Aguardando o login no Qobuz…",
+      "failed": "Não foi possível conectar ao Qobuz.",
+      "doneTitle": "Qobuz conectado",
+      "doneBody": "Os downloads em Hi-Res estão liberados."
+    },
+    "spotify": {
+      "title": "Conecte o Spotify",
+      "body": "Para trazer playlists do Spotify para o Garimpo. O assistente cria as chaves de acesso no site do Spotify com você. Também dá para fazer depois.",
+      "connect": "Conectar o Spotify",
+      "doneTitle": "Spotify conectado",
+      "doneBody": "Suas playlists do Spotify já podem ser convertidas."
+    },
+    "done": {
+      "title": "Tudo pronto",
+      "body": "O Garimpo está liberado. Você pode mudar essas conexões quando quiser em Configurações.",
+      "start": "Começar a usar"
+    }
   }
 }

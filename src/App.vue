@@ -12,6 +12,8 @@ import { useWizardStore } from './stores/wizardStore'
 import ToastContainer from './components/ToastContainer.vue'
 import UpdateDialog from './components/UpdateDialog.vue'
 import AccountGate from './components/AccountGate.vue'
+import OnboardingFlow from './components/OnboardingFlow.vue'
+import { useOnboardingStore } from './stores/onboardingStore'
 import { useAccountStore } from './stores/accountStore'
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal.vue'
 import OfflineBanner from './components/OfflineBanner.vue'
@@ -95,6 +97,7 @@ const handleBeforeUnload = () => {
 }
 
 const accountStore = useAccountStore()
+const onboardingStore = useOnboardingStore()
 
 onMounted(async () => {
   console.log('[App] Starting initialization...')
@@ -165,6 +168,7 @@ onMounted(async () => {
   window.addEventListener('beforeunload', handleBeforeUnload)
 
   isLoading.value = false
+  onboardingStore.appReady = true
   console.log('[App] Initialization complete')
 
   // Non-blocking: start the update schedule; the main process does the checking
@@ -210,6 +214,7 @@ onBeforeUnmount(() => {
     <!-- Toast Notifications -->
     <ToastContainer />
     <AccountGate v-if="accountStore.ready && !accountStore.canUseApp" />
+    <OnboardingFlow v-else-if="onboardingStore.visible" />
     <UpdateDialog />
     <DeezerWizard :show="wizardStore.deezerOpen" @close="wizardStore.deezerOpen = false" />
     <SpotifyWizard :show="wizardStore.spotifyOpen" @close="wizardStore.spotifyOpen = false" />
