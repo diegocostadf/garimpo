@@ -88,7 +88,7 @@ function getArtistName(item: any): string {
           />
         </div>
         <div class="flex justify-between mt-1 font-mono text-[10px] tracking-[0.08em] text-foreground-muted">
-          <span class="text-primary-500">{{ progress }}%</span>
+          <span class="text-primary-400">{{ progress }}%</span>
           <span v-if="queueCount > 0" class="uppercase">
             +{{ queueCount }} in queue
           </span>

@@ -11,6 +11,7 @@ export interface DeezerUser {
   country?: string
   canStream: boolean
   canDownload: boolean
+  maxQuality?: '128' | '320' | 'flac'
   subscription?: {
     type: string
     expires?: string
@@ -47,10 +48,16 @@ export const useAuthStore = defineStore('auth', () => {
   const authExpiredReason = ref<string | null>(null)
 
   const isLoggedIn = computed(() => isAuthenticated.value && user.value !== null)
-  const isPremium = computed(() =>
-    user.value?.subscription?.type &&
-    !['Free', 'free'].includes(user.value.subscription.type)
-  )
+  // Best quality the signed-in account may download. Older sessions without the
+  // flag fall back to the offer name ("Deezer Free" and "Free" are free plans).
+  const maxQuality = computed<'128' | '320' | 'flac' | null>(() => {
+    if (!user.value) return null
+    if (user.value.maxQuality) return user.value.maxQuality
+    const type = user.value.subscription?.type || ''
+    if (!type || /free/i.test(type)) return '128'
+    return /hifi|hi-fi|family|premium\+|lossless/i.test(type) ? 'flac' : '320'
+  })
+  const isPremium = computed(() => !!maxQuality.value && maxQuality.value !== '128')
 
   async function init() {
     console.log('[AuthStore] Initializing...')
@@ -388,6 +395,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isLoggedIn,
     isPremium,
+    maxQuality,
     isLoading,
     error,
     serverPort,

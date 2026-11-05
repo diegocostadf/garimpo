@@ -362,7 +362,7 @@ onMounted(loadGenres)
           <div v-else-if="dzCanLoadMore('tracks')" class="text-center pt-4">
             <button
               @click="loadDeezerChartPage('tracks')"
-              class="font-mono text-[10px] tracking-[0.16em] uppercase px-5 py-2 border border-primary-500/50 text-primary-400 hover:bg-primary-500 hover:text-background-main transition-colors"
+              class="font-mono text-[10px] tracking-[0.16em] uppercase px-5 py-2 border border-primary-500/50 text-primary-400 hover:bg-primary-500 hover:text-white transition-colors"
             >{{ t('genres.moreTracks') }}</button>
           </div>
         </section>
@@ -382,7 +382,7 @@ onMounted(loadGenres)
           <div v-else-if="dzCanLoadMore('albums')" class="text-center pt-4 pb-8">
             <button
               @click="loadDeezerChartPage('albums')"
-              class="font-mono text-[10px] tracking-[0.16em] uppercase px-5 py-2 border border-primary-500/50 text-primary-400 hover:bg-primary-500 hover:text-background-main transition-colors"
+              class="font-mono text-[10px] tracking-[0.16em] uppercase px-5 py-2 border border-primary-500/50 text-primary-400 hover:bg-primary-500 hover:text-white transition-colors"
             >{{ t('genres.moreAlbums') }}</button>
           </div>
         </section>

@@ -6,7 +6,9 @@ import { useDownloadStore } from '../stores/downloadStore'
 import { useAuthStore } from '../stores/authStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useWizardStore } from '../stores/wizardStore'
+import { useAccountStore, type ModuleId } from '../stores/accountStore'
 import BrandMark from './BrandMark.vue'
+import { useQuality } from '../composables/useQuality'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -14,11 +16,13 @@ const downloadStore = useDownloadStore()
 const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
 const wizardStore = useWizardStore()
+const account = useAccountStore()
+const { label: qualityLabel } = useQuality()
 
 const activeDownloadsCount = computed(() => downloadStore.activeDownloads.length)
 const isSlim = computed(() => settingsStore.settings.appearance?.slimSidebar ?? false)
 
-interface NavItem { path: string; label: string; hidden?: boolean; live?: boolean }
+interface NavItem { path: string; label: string; hidden?: boolean; live?: boolean; module?: ModuleId }
 
 // Three short groups. Everything that is configuration (accounts, about,
 // appearance) lives in Ajustes, and pasting a link works from any search box,
@@ -31,7 +35,7 @@ const groups = computed(() => [
       { path: '/search', label: t('nav.search') },
       { path: '/charts', label: t('nav.charts') },
       { path: '/genres', label: t('nav.genres') },
-      { path: '/qobuz', label: 'Qobuz', hidden: !settingsStore.isQobuzConnected }
+      { path: '/qobuz', label: 'Qobuz', hidden: !settingsStore.isQobuzConnected, module: 'qobuz' }
     ] as NavItem[]
   },
   {
@@ -45,8 +49,8 @@ const groups = computed(() => [
   {
     label: t('nav.groups.tools'),
     items: [
-      { path: '/convert', label: t('nav.convert') },
-      { path: '/dj', label: t('nav.dj') },
+      { path: '/convert', label: t('nav.convert'), module: 'converter' },
+      { path: '/dj', label: t('nav.dj'), module: 'dj' },
       { path: '/sync', label: t('nav.playlistSync') }
     ] as NavItem[]
   }
@@ -90,6 +94,7 @@ const isActive = (path: string) => (path === '/' ? route.path === '/' : route.pa
         >
           <span class="font-mono text-[11px] w-5 text-center" :class="isActive(item.path) ? 'text-primary-400' : ''">{{ item.num }}</span>
           <span v-if="!isSlim" class="flex-1 truncate">{{ item.label }}</span>
+          <svg v-if="item.module && !account.has(item.module)" class="w-3.5 h-3.5 text-foreground-muted" :class="isSlim ? 'absolute top-1 right-1.5' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" :aria-label="t('account.locked')"><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
           <span v-if="item.live" class="w-2 h-2 rounded-full bg-primary-500 animate-pulse" :class="isSlim ? 'absolute top-1.5 right-2' : ''" aria-hidden="true" />
         </router-link>
       </div>
@@ -113,12 +118,15 @@ const isActive = (path: string) => (path === '/' ? route.path === '/' : route.pa
         @click="authStore.isLoggedIn ? $router.push('/settings') : wizardStore.openDeezer()"
         class="flex flex-col gap-2 p-3.5 rounded-[18px] bg-surface border border-line text-left hover:border-line-strong transition-colors"
       >
+        <span v-if="account.state.mode === 'remote' && account.state.user" class="text-xs truncate pb-1 border-b border-line" :title="account.state.user.email">
+          {{ account.state.user.email }} · <span class="font-mono uppercase text-[10px]" :class="account.state.offline ? 'text-foreground-muted' : 'text-primary-400'">{{ account.state.offline ? t('account.offline') : account.state.profile?.plan }}</span>
+        </span>
         <span class="flex items-center gap-2 font-mono text-[11px] uppercase" :class="authStore.isLoggedIn ? 'text-foreground' : 'text-foreground-muted'">
-          <span class="w-2 h-2 rounded-full" :class="authStore.isLoggedIn ? 'bg-foreground' : 'border border-foreground-muted'" />
-          Deezer · {{ authStore.isLoggedIn ? (authStore.isPremium ? 'FLAC' : 'MP3') : t('wizard.deezer.connect') }}
+          <span class="w-2 h-2 rounded-full" :class="authStore.isLoggedIn ? 'bg-primary-500' : 'border border-foreground-muted'" />
+          Deezer · {{ authStore.isLoggedIn ? qualityLabel : t('wizard.deezer.connect') }}
         </span>
         <span class="flex items-center gap-2 font-mono text-[11px] uppercase" :class="settingsStore.isQobuzLinked ? 'text-foreground' : 'text-foreground-muted'">
-          <span class="w-2 h-2 rounded-full" :class="settingsStore.isQobuzLinked ? 'bg-foreground' : 'border border-foreground-muted'" />
+          <span class="w-2 h-2 rounded-full" :class="settingsStore.isQobuzLinked ? 'bg-primary-500' : 'border border-foreground-muted'" />
           Qobuz · {{ settingsStore.isQobuzLinked ? 'HI-RES' : t('wizard.deezer.connect') }}
         </span>
       </button>

@@ -11,6 +11,7 @@ describe('installMode', () => {
   })
   test('Windows installer and portable', () => {
     expect(installMode({ platform: 'win32', packaged: true })).toEqual({ kind: 'installer' })
+    expect(installMode({ platform: 'win32', arch: 'ia32', packaged: true })).toEqual({ kind: 'manual', reason: 'unsupported' })
     expect(installMode({ platform: 'win32', packaged: true, portableExe: 'C:\\a.exe', portableDirWritable: true })).toEqual({ kind: 'portable' })
     expect(installMode({ platform: 'win32', packaged: true, portableExe: 'C:\\a.exe', portableDirWritable: false })).toEqual({ kind: 'manual', reason: 'readonly' })
   })
@@ -22,9 +23,10 @@ describe('installMode', () => {
 
 describe('isDeveloperIdSigned', () => {
   const signed = 'Authority=Developer ID Application: Andre Hall (W966GFT83K)\nAuthority=Developer ID Certification Authority\nTeamIdentifier=W966GFT83K\n'
-  test('accepts our team', () => expect(isDeveloperIdSigned(signed)).toBe(true))
+  test('accepts our team', () => expect(isDeveloperIdSigned(signed, 'W966GFT83K')).toBe(true))
+  test('no team configured means never Developer ID', () => expect(isDeveloperIdSigned(signed, '')).toBe(false))
   test('refuses ad-hoc', () => expect(isDeveloperIdSigned('Signature=adhoc\nTeamIdentifier=not set\n')).toBe(false))
-  test('refuses another team', () => expect(isDeveloperIdSigned(signed.replaceAll('W966GFT83K', 'AAAAAAAAAA'))).toBe(false))
+  test('refuses another team', () => expect(isDeveloperIdSigned(signed.replaceAll('W966GFT83K', 'AAAAAAAAAA'), 'W966GFT83K')).toBe(false))
 })
 
 describe('newer', () => {

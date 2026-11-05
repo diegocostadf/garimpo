@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { qualityLabel as labelOf } from '../composables/useQuality'
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/authStore'
@@ -30,7 +31,7 @@ const stepIndex = computed(() => ({ start: 0, arl: 0, waiting: 1, checking: 1, d
 
 const firstName = computed(() => (authStore.user?.name || '').split(' ')[0] || '')
 const planLabel = computed(() => authStore.user?.subscription?.type || t('sidebar.free'))
-const qualityLabel = computed(() => (authStore.isPremium ? 'FLAC' : 'MP3 128'))
+const qualityLabel = computed(() => labelOf(authStore.maxQuality || '128'))
 const regionLabel = computed(() => {
   const code = authStore.user?.country
   if (!code) return '—'
@@ -134,11 +135,11 @@ function close() {
             </div>
             <ul class="flex flex-col gap-2.5">
               <li v-for="k in ['promise1', 'promise2', 'promise3']" :key="k" class="flex gap-2.5 text-sm text-foreground-muted">
-                <svg class="w-[18px] h-[18px] flex-none mt-px text-primary-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10" /></svg>
+                <svg class="w-[18px] h-[18px] flex-none mt-px text-primary-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10" /></svg>
                 {{ t('wizard.deezer.' + k) }}
               </li>
             </ul>
-            <p v-if="error" role="alert" class="text-sm text-red-400 bg-red-500/10 rounded-xl px-4 py-3">{{ error }}</p>
+            <p v-if="error" role="alert" class="text-sm text-primary-400 bg-primary-500/10 rounded-xl px-4 py-3">{{ error }}</p>
             <button type="button" @click="startBrowserLogin" class="h-[52px] rounded-2xl bg-primary-500 text-white text-base font-semibold hover:bg-primary-600 transition-colors">{{ t('wizard.deezer.start') }}</button>
             <button type="button" @click="step = 'arl'; error = ''" class="min-h-[44px] text-sm text-foreground-muted underline hover:text-foreground">{{ t('wizard.deezer.haveArl') }}</button>
           </div>
@@ -179,7 +180,7 @@ function close() {
               />
             </label>
             <p class="text-[13px] leading-relaxed text-foreground-muted">{{ t('wizard.deezer.arlSafe') }}</p>
-            <p v-if="error" role="alert" class="text-sm text-red-400 bg-red-500/10 rounded-xl px-4 py-3">{{ error }}</p>
+            <p v-if="error" role="alert" class="text-sm text-primary-400 bg-primary-500/10 rounded-xl px-4 py-3">{{ error }}</p>
             <button type="submit" class="h-[52px] rounded-2xl bg-primary-500 text-white text-base font-semibold hover:bg-primary-600 transition-colors">{{ t('wizard.deezer.connect') }}</button>
             <button type="button" @click="back" class="min-h-[44px] text-sm text-foreground-muted hover:text-foreground">{{ t('wizard.back') }}</button>
           </form>
@@ -187,7 +188,7 @@ function close() {
           <!-- 3. Done -->
           <div v-else class="flex flex-col gap-5">
             <span class="w-14 h-14 rounded-full bg-primary-500/15 flex items-center justify-center" aria-hidden="true">
-              <svg class="w-7 h-7 text-primary-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10" /></svg>
+              <svg class="w-7 h-7 text-primary-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10" /></svg>
             </span>
             <div class="flex flex-col gap-2">
               <h1 id="deezer-wizard-title" class="text-[28px] font-semibold tracking-tight">{{ t('wizard.deezer.doneTitle', { name: firstName }) }}</h1>

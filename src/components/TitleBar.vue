@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/authStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useDownloadStore } from '../stores/downloadStore'
+import { useQuality, qualityLabel as labelOf } from '../composables/useQuality'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -36,12 +37,7 @@ const detectLinux = (): boolean => {
 }
 const isLinux = detectLinux()
 
-const qualityLabel = computed(() => {
-  const q = settingsStore.settings.quality
-  if (q === 'flac') return 'FLAC'
-  if (q === '320') return 'MP3 320'
-  return 'MP3 128'
-})
+const { label: qualityLabel, capped: qualityCapped, selected: selectedQuality } = useQuality()
 
 const region = computed(() => authStore.user?.country || '')
 
@@ -80,7 +76,7 @@ const close = () => window.electronAPI?.close()
     <div class="flex-1 h-full"></div>
 
     <!-- Live throughput (only while downloading) -->
-    <span v-if="throughput" class="hidden sm:inline font-mono text-primary-500">{{ throughput }}</span>
+    <span v-if="throughput" class="hidden sm:inline font-mono text-primary-400">{{ throughput }}</span>
 
     <!-- Status pills: account region, Qobuz link and default quality -->
     <span v-if="region" class="hidden md:inline-flex items-center h-6 px-2 rounded-full border border-line">{{ region }}</span>
@@ -88,12 +84,16 @@ const close = () => window.electronAPI?.close()
       class="hidden sm:inline-flex items-center gap-1.5 h-6 px-2 rounded-full border border-line"
       v-tooltip="settingsStore.isQobuzLinked ? t('titleBar.qobuzLinkedTip') : t('titleBar.qobuzOfflineTip')"
     >
-      <span class="w-1.5 h-1.5 rounded-full" :class="settingsStore.isQobuzLinked ? 'bg-primary-500' : 'bg-line-strong'"></span>
+      <span class="w-1.5 h-1.5 rounded-full" :class="settingsStore.isQobuzLinked ? 'bg-primary-500' : 'border border-foreground-muted'"></span>
       Qobuz
     </span>
-    <span class="hidden sm:inline-flex items-center gap-1.5 h-6 px-2 rounded-full border border-line text-foreground">
-      <span class="w-1.5 h-1.5 rounded-full" :class="authStore.isLoggedIn ? 'bg-primary-500' : 'bg-red-500'"></span>
-      {{ qualityLabel }}
+    <span
+      class="hidden sm:inline-flex items-center gap-1.5 h-6 px-2 rounded-full border border-line text-foreground"
+      data-testid="quality-badge"
+      v-tooltip="!authStore.isLoggedIn ? t('titleBar.qualityLoggedOut') : qualityCapped ? t('titleBar.qualityCapped', { chosen: labelOf(selectedQuality), quality: qualityLabel }) : t('titleBar.qualityTip', { quality: qualityLabel })"
+    >
+      <span class="w-1.5 h-1.5 rounded-full" :class="authStore.isLoggedIn ? 'bg-primary-500' : 'border border-foreground-muted'"></span>
+      {{ qualityLabel }}<span v-if="qualityCapped" class="text-foreground-muted">*</span>
     </span>
 
     <!-- Window controls (Windows only: Mac shows native traffic lights, Linux
@@ -124,7 +124,7 @@ const close = () => window.electronAPI?.close()
       <button
         @click="close"
         :aria-label="t('accessibility.closeWindow')"
-        class="w-12 h-full flex items-center justify-center text-foreground hover:bg-red-500 hover:text-white transition-colors"
+        class="w-12 h-full flex items-center justify-center text-foreground hover:bg-primary-500 hover:text-white transition-colors"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18L18 6M6 6l12 12" />

@@ -1,0 +1,144 @@
+name: Release
+
+# Builds every installer when a version tag is pushed (git tag v0.3.0 && git push --tags):
+#   macOS  Intel (x64) and Apple Silicon (arm64): .dmg and .zip
+#   Windows 10/11 64-bit (x64) and 32-bit (ia32): Setup .exe and portable .exe
+# then publishes them, with the update feeds, as a GitHub release.
+#
+# Signing
+#   macOS: with the secrets MAC_CERT_P12 (base64 Developer ID .p12), MAC_CERT_PASSWORD and
+#   APPLE_TEAM_ID the app is signed with Developer ID; with APPLE_ID, APPLE_APP_PASSWORD it is
+#   also notarized. Without them it is signed ad hoc (Gatekeeper asks once on first open).
+#   Windows: with WIN_CERT_P12 (base64 .pfx) and WIN_CERT_PASSWORD the installers are signed;
+#   without them SmartScreen shows "unknown publisher" on first run.
+#
+# Accounts: repository variables GARIMPO_SUPABASE_URL and GARIMPO_SUPABASE_ANON_KEY turn on login.
+# Releases repo: variable GARIMPO_RELEASES_REPO (owner/name) publishes to a public releases-only repo
+# (needs the secret RELEASES_TOKEN with contents:write on that repo).
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  GARIMPO_SUPABASE_URL: ${{ vars.GARIMPO_SUPABASE_URL }}
+  GARIMPO_SUPABASE_ANON_KEY: ${{ vars.GARIMPO_SUPABASE_ANON_KEY }}
+  GARIMPO_RELEASES_REPO: ${{ vars.GARIMPO_RELEASES_REPO || github.repository }}
+  GARIMPO_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bunx vue-tsc --noEmit
+      - run: bun test tests
+      - run: bun scripts/i18n-check.ts
+
+  mac:
+    needs: test
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: bun install --frozen-lockfile
+      - name: Build (Developer ID when available, otherwise ad hoc)
+        env:
+          CSC_LINK: ${{ secrets.MAC_CERT_P12 }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          rm -rf dist dist-electron
+          npx vite build
+          if [ -n "$CSC_LINK" ]; then
+            NOTARIZE=false; [ -n "$APPLE_ID" ] && NOTARIZE=true
+            npx electron-builder --mac --x64 --arm64 --publish never -c.mac.notarize=$NOTARIZE
+          else
+            CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac --x64 --arm64 --publish never -c.mac.identity=-
+          fi
+      - name: Verify signatures
+        run: |
+          for app in release/mac*/Garimpo.app; do
+            codesign --verify --deep --strict "$app" && codesign -dv "$app" 2>&1 | grep -E "Signature|Authority|TeamIdentifier" || true
+            lipo -archs "$app/Contents/MacOS/Garimpo"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac
+          path: |
+            release/*.dmg
+            release/*.zip
+            release/*.blockmap
+
+  windows:
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: bun install --frozen-lockfile
+      - name: Build x64 and ia32
+        shell: bash
+        env:
+          CSC_LINK: ${{ secrets.WIN_CERT_P12 }}
+          CSC_KEY_PASSWORD: ${{ secrets.WIN_CERT_PASSWORD }}
+        run: |
+          rm -rf dist dist-electron
+          npx vite build
+          if [ -z "$CSC_LINK" ]; then export CSC_IDENTITY_AUTO_DISCOVERY=false; unset CSC_LINK CSC_KEY_PASSWORD; fi
+          npx electron-builder --win --x64 --ia32 --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: |
+            release/*.exe
+            release/*.blockmap
+
+  publish:
+    needs: [mac, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+      - uses: actions/download-artifact@v4
+        with:
+          path: release
+          merge-multiple: true
+      - name: Update feeds
+        run: bun scripts/write-update-feeds.ts
+      - name: Release notes
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          awk "/^## \\[$VERSION\\]/{flag=1;next}/^## \\[/{flag=0}flag" CHANGELOG.md > notes.md
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v$VERSION" \
+            --repo "$GARIMPO_RELEASES_REPO" \
+            --title "Garimpo $VERSION" \
+            --notes-file notes.md \
+            release/*.dmg release/*.zip release/*.exe release/*.yml

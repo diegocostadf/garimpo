@@ -699,7 +699,15 @@
       "accounts": "Accounts",
       "profiles": "Profiles and backup",
       "about": "About"
-    }
+    },
+    "needsPlan": "needs a paid Deezer plan",
+    "qualityCapped": "Your Deezer plan downloads up to {quality}. Downloads use this quality until you upgrade.",
+    "deezerConnectedAs": "Connected as {name}",
+    "deezerMaxQuality": "up to {quality}",
+    "deezerSwitch": "Switch account",
+    "deezerAdvancedArl": "Advanced: use another ARL",
+    "spotifyConnected": "Spotify connected (Client ID {id})",
+    "spotifyRedo": "Redo with the assistant"
   },
   "login": {
     "title": "Masuk ke Deezer",
@@ -899,7 +907,8 @@
     "noneQueued": "Tidak ada unduhan yang dapat dimasukkan ke antrean, periksa apakah Anda sudah masuk",
     "copyFailed": "Gagal menyalin",
     "pasteFailed": "Gagal menempel, akses clipboard ditolak",
-    "copiedLabel": "{label} disalin"
+    "copiedLabel": "{label} disalin",
+    "connectDeezerFirst": "Connect your Deezer account to download."
   },
   "sync": {
     "sortBy": "Urutkan berdasarkan",
@@ -1076,7 +1085,10 @@
     "qobuzLinkedTip": "Qobuz terhubung",
     "qobuzOfflineTip": "Qobuz tidak terhubung — hubungkan di Pengaturan",
     "region": "WILAYAH",
-    "quality": "KUALITAS"
+    "quality": "KUALITAS",
+    "qualityLoggedOut": "Deezer not connected. Connect to download.",
+    "qualityCapped": "You chose {chosen}, but your Deezer plan downloads up to {quality}.",
+    "qualityTip": "Downloads in {quality}"
   },
   "about": {
     "disclaimer": "Aplikasi ini tidak berafiliasi dengan, tidak diizinkan oleh, dan tidak didukung oleh Deezer, Qobuz, atau Spotify. Aplikasi ini ditujukan untuk penggunaan pribadi dengan akun Anda sendiri. Harap gunakan secara bertanggung jawab dan sesuai dengan hukum setempat mengenai pengunduhan musik, serta hormati hak cipta dan ketentuan layanan dari setiap platform streaming. Pengunduhan Qobuz memerlukan langganan Qobuz berbayar milik Anda sendiri yang masih aktif.",
@@ -1265,7 +1277,7 @@
     "checkFailed": "Tidak dapat memeriksa pembaruan.",
     "statusAvailable": "Versi {version} tersedia.",
     "skipped": "Anda melewati versi {version}.",
-    "manualUnsigned": "Pembaruan ini perlu diunduh manual satu kali. Pembaruan berikutnya akan terpasang sendiri.",
+    "manualUnsigned": "On this Mac the new version is installed by hand: download it, open the file and drag Garimpo to Applications, replacing the old one.",
     "manualReadonly": "Aplikasi tidak bisa menulis ke foldernya, jadi unduh versi baru dari halaman rilis.",
     "manualUnsupported": "Instalasi ini tidak memperbarui dirinya sendiri. Dapatkan versi baru dari halaman rilis atau pengelola paket Anda.",
     "manualFailed": "Pembaruan tidak dapat dipasang: {error}. Anda bisa mengunduhnya dari halaman rilis.",
@@ -1498,5 +1510,68 @@
     "howOthers": "Engine DJ, djay Pro and others: import the .m3u8 files from the Garimpo/DJ/M3U folder in your Music folder.",
     "min": "min",
     "max": "max"
+  },
+  "account": {
+    "heroTitle": "Your music, organised.",
+    "heroBody": "Sign in with your Garimpo account to download, convert playlists and prepare your DJ sets.",
+    "privacy": "Your music and files stay on your computer.",
+    "label": "Garimpo account",
+    "title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "show": "Show",
+    "hide": "Hide",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "forgot": "Forgot password",
+    "noAccess": "No access yet? Ask the administrator.",
+    "resetLabel": "Password",
+    "resetTitle": "Reset password",
+    "resetBody": "We will send a link to create a new password.",
+    "sendReset": "Send link",
+    "resetSent": "If {email} has an account, a link to create a new password is on its way.",
+    "backToLogin": "Back to sign in",
+    "checkAgain": "Check again",
+    "signOut": "Sign out",
+    "locked": "Not included in your plan",
+    "lockedLabel": "Not in your plan",
+    "lockedBody": "This module is not part of your current plan ({plan}). Ask the administrator to enable it, then check again.",
+    "seeAccount": "See my account",
+    "cardLabel": "Garimpo account",
+    "devTitle": "Development mode",
+    "devBody": "Login is not configured in this build, so every module is unlocked.",
+    "plan": "Plan",
+    "until": "until {date}",
+    "offline": "offline",
+    "modules": {
+      "downloads": "Downloads",
+      "converter": "Converter",
+      "dj": "DJ studio",
+      "qobuz": "Qobuz"
+    },
+    "reason": {
+      "blocked": {
+        "label": "Access blocked",
+        "title": "Your access is blocked",
+        "body": "Talk to the administrator to unblock your account."
+      },
+      "pending": {
+        "label": "Waiting for approval",
+        "title": "Your account is waiting for approval",
+        "body": "As soon as the administrator approves it, Garimpo opens here. Use Check again."
+      },
+      "expired": {
+        "label": "Plan expired",
+        "title": "Your plan has expired",
+        "body": "Renew your plan to keep using Garimpo, then use Check again."
+      }
+    },
+    "errors": {
+      "E_CREDENTIALS": "Wrong email or password.",
+      "E_NETWORK": "No connection to the Garimpo server. Check your internet.",
+      "E_RATE": "Too many attempts. Wait a minute and try again.",
+      "E_CONFIG": "Login is not configured in this build.",
+      "E_UNKNOWN": "Could not sign in. Try again."
+    }
   }
 }

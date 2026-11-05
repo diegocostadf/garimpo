@@ -496,7 +496,7 @@ const contextMenuItems = computed(() => {
           <span class="font-display uppercase text-[64px] text-foreground-muted">{{ (artist.name || '?').charAt(0) }}</span>
         </div>
         <div class="flex-1">
-          <p class="font-mono text-[10px] tracking-[0.3em] uppercase text-primary-500 mb-2">{{ t('common.artist') }}</p>
+          <p class="font-mono text-[10px] tracking-[0.3em] uppercase text-primary-400 mb-2">{{ t('common.artist') }}</p>
           <h1 class="font-display uppercase text-[34px] leading-[1.02] tracking-[-0.01em] mb-4">{{ artist.name }}</h1>
           <p v-if="artist.nb_fan" class="text-foreground-muted mb-4">
             {{ artist.nb_fan.toLocaleString() }} {{ t('common.fans') }}
@@ -519,7 +519,7 @@ const contextMenuItems = computed(() => {
             >
               <svg
                 class="w-5 h-5"
-                :class="isFavorite() ? 'fill-primary-500 text-primary-500' : ''"
+                :class="isFavorite() ? 'fill-primary-500 text-primary-400' : ''"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -554,7 +554,7 @@ const contextMenuItems = computed(() => {
               </router-link>
               <span
                 v-if="isNewRelease(latestRelease.release_date)"
-                class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-green-500 text-white"
+                class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-foreground text-background-main"
               >
                 NEW
               </span>

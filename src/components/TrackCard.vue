@@ -133,7 +133,7 @@ const contextMenuItems = computed(() => [
       <button
         v-if="isPlaying"
         @click="togglePlay"
-        class="flex items-center justify-center w-5 h-5 mx-auto text-primary-500 hover:text-primary-400"
+        class="flex items-center justify-center w-5 h-5 mx-auto text-primary-400 hover:text-primary-400"
         :title="t('trackCard.stop')"
       >
         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -226,7 +226,7 @@ const contextMenuItems = computed(() => [
       >
         <svg
           class="w-4.5 h-4.5"
-          :class="isFavorite ? 'fill-primary-500 text-primary-500' : 'text-foreground-muted'"
+          :class="isFavorite ? 'fill-primary-500 text-primary-400' : 'text-foreground-muted'"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

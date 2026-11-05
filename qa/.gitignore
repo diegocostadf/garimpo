@@ -1,0 +1,5 @@
+shots/
+node_modules/
+test.mp3
+qa-results.json
+package*.json

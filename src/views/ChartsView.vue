@@ -314,7 +314,7 @@ function getCountryFlag(code: string): string {
         @click="changeTab(tab.id as typeof activeTab)"
         class="flex items-center gap-2 px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] border transition-colors"
         :class="activeTab === tab.id
-          ? 'text-primary-500 border-primary-500/60 bg-primary-500/10'
+          ? 'text-primary-400 border-primary-500/60 bg-primary-500/10'
           : 'text-foreground-muted border-line hover:text-foreground hover:border-line-strong'"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -34,6 +34,17 @@ interface ElectronSettingsLoadResult {
   settings: object | null
 }
 
+interface AccountState {
+  mode: 'dev' | 'remote'
+  signedIn: boolean
+  user: { id: string; email: string } | null
+  profile: { plan: string; status: 'active' | 'blocked' | 'pending'; modules: string[]; expires_at: string | null; display_name?: string | null } | null
+  modules: string[]
+  offline: boolean
+  reason?: 'blocked' | 'expired' | 'pending' | null
+}
+interface AccountResult { ok: boolean; error?: string; state: AccountState }
+
 declare global {
   interface Window {
     electronAPI: {
@@ -43,6 +54,14 @@ declare global {
       isMaximized: () => Promise<boolean>
       selectFolder: (defaultPath?: string) => Promise<string | null>
       selectFile: (opts?: { title?: string; extensions?: string[]; defaultPath?: string }) => Promise<string | null>
+      account: {
+        state: () => Promise<AccountResult>
+        signIn: (email: string, password: string) => Promise<AccountResult>
+        signOut: () => Promise<AccountResult>
+        resetPassword: (email: string) => Promise<AccountResult>
+        refresh: () => Promise<AccountResult>
+        logModule: (module: string) => Promise<boolean>
+      }
       openPath: (path: string) => Promise<void>
       openExternal: (url: string) => Promise<void>
       deletePath: (path: string) => Promise<void>

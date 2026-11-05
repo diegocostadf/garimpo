@@ -922,8 +922,8 @@ async function pasteLink() {
     </div>
 
     <!-- Error State -->
-    <div v-if="error" class="border border-red-500/30 bg-red-500/10 px-4 py-3">
-      <div class="flex items-center gap-3 text-red-400">
+    <div v-if="error" class="border border-primary-500/30 bg-primary-500/10 px-4 py-3">
+      <div class="flex items-center gap-3 text-primary-400">
         <svg class="w-6 h-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -938,7 +938,7 @@ async function pasteLink() {
         <span class="font-mono text-[10.5px] uppercase tracking-[0.12em] text-foreground-muted">
           {{ t('analyzer.batchSummary', { links: batch.length, ready: batchReady }) }}<span v-if="batchDone < batch.length"> · {{ t('analyzer.batchAnalyzed', { done: batchDone, total: batch.length }) }}</span><span v-else-if="batch.length - batchReady > 0"> · {{ t('analyzer.batchFailed', { count: batch.length - batchReady }) }}</span>
         </span>
-        <svg v-if="batchRunning" class="animate-spin w-3.5 h-3.5 text-primary-500" fill="none" viewBox="0 0 24 24">
+        <svg v-if="batchRunning" class="animate-spin w-3.5 h-3.5 text-primary-400" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
         </svg>
@@ -946,7 +946,7 @@ async function pasteLink() {
         <button
           type="button"
           :disabled="batchRunning || batchDownloading || batchReady === 0"
-          class="px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.1em] bg-primary-500 text-background-main hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          class="px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.1em] bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           @click="downloadAllReady"
         >
           {{ batchDownloading ? t('analyzer.queuing') : t('analyzer.downloadAllReady', { count: batchReady }) }}
@@ -970,19 +970,19 @@ async function pasteLink() {
         >
           <span
             class="w-2 h-2 flex-shrink-0 rounded-full"
-            :class="row.status === 'ready' ? 'bg-green-400' : row.status === 'failed' ? 'bg-red-400' : row.status === 'analyzing' ? 'bg-primary-500 animate-pulse' : 'bg-white/20'"
+            :class="row.status === 'ready' ? 'bg-foreground' : row.status === 'failed' ? 'bg-primary-500' : row.status === 'analyzing' ? 'bg-primary-500 animate-pulse' : 'bg-white/20'"
           ></span>
           <span class="flex-shrink-0 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] border border-line text-foreground-muted">{{ row.type || row.kind }}</span>
           <div class="flex-1 min-w-0">
             <div class="truncate" :class="row.status === 'failed' ? 'text-foreground-muted' : ''">{{ row.title || row.url }}</div>
-            <div v-if="row.status === 'failed'" class="truncate text-xs text-red-400">{{ row.error }}</div>
+            <div v-if="row.status === 'failed'" class="truncate text-xs text-primary-400">{{ row.error }}</div>
             <div v-else-if="row.subtitle" class="truncate text-xs text-foreground-muted">{{ row.subtitle }}</div>
           </div>
           <button
             v-if="row.status === 'ready' && row.type !== 'artist'"
             type="button"
             :disabled="batchDownloading"
-            class="flex-shrink-0 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] border border-primary-500/40 text-primary-500 hover:bg-primary-500/10 disabled:opacity-50 transition-colors"
+            class="flex-shrink-0 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] border border-primary-500/40 text-primary-400 hover:bg-primary-500/10 disabled:opacity-50 transition-colors"
             @click.stop="downloadBatchRow(i)"
           >
             {{ t('analyzer.download') }}
@@ -1019,9 +1019,9 @@ async function pasteLink() {
                 class="inline-block px-1.5 py-0.5 font-mono text-[10px] tracking-[0.08em] uppercase border mb-2"
                 :class="{
                   'bg-primary-500/10 text-primary-400 border-primary-500/30': result.type === 'track',
-                  'bg-blue-500/10 text-blue-400 border-blue-500/30': result.type === 'album',
-                  'bg-green-500/10 text-green-400 border-green-500/30': result.type === 'artist',
-                  'bg-orange-500/10 text-orange-400 border-orange-500/30': result.type === 'playlist'
+                  'bg-hover text-foreground-muted border-line-strong': result.type === 'album',
+                  'bg-hover text-foreground border-line-strong': result.type === 'artist',
+                  'bg-primary-500/10 text-primary-400 border-primary-500/40': result.type === 'playlist'
                 }"
               >
                 {{ result.type.toUpperCase() }}
@@ -1069,7 +1069,7 @@ async function pasteLink() {
           <p v-if="!authStore.isLoggedIn && result.type !== 'artist'" class="text-sm text-foreground-muted mt-2">
             {{ t('analyzer.loginRequired') }}
           </p>
-          <p v-else-if="result.type === 'track' && !result.available" class="text-sm text-red-400 mt-2">
+          <p v-else-if="result.type === 'track' && !result.available" class="text-sm text-primary-400 mt-2">
             {{ t('analyzer.notAvailable') }}
           </p>
         </div>
@@ -1117,32 +1117,32 @@ async function pasteLink() {
           <div class="flex items-center gap-2">
             <div
               class="w-6 h-6 flex items-center justify-center border"
-              :class="result.readable ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'"
+              :class="result.readable ? 'bg-hover border-line-strong' : 'bg-primary-500/10 border-primary-500/30'"
             >
-              <svg v-if="result.readable" class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-if="result.readable" class="w-4 h-4 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <svg v-else class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-else class="w-4 h-4 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-            <span class="font-mono text-[11px] tracking-[0.08em] uppercase" :class="result.readable ? 'text-green-400' : 'text-red-400'">
+            <span class="font-mono text-[11px] tracking-[0.08em] uppercase" :class="result.readable ? 'text-foreground' : 'text-primary-400'">
               {{ result.readable ? t('analyzer.streamable') : t('analyzer.notStreamable') }}
             </span>
           </div>
           <div class="flex items-center gap-2">
             <div
               class="w-6 h-6 flex items-center justify-center border"
-              :class="result.available ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'"
+              :class="result.available ? 'bg-hover border-line-strong' : 'bg-primary-500/10 border-primary-500/30'"
             >
-              <svg v-if="result.available" class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-if="result.available" class="w-4 h-4 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <svg v-else class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-else class="w-4 h-4 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-            <span class="font-mono text-[11px] tracking-[0.08em] uppercase" :class="result.available ? 'text-green-400' : 'text-red-400'">
+            <span class="font-mono text-[11px] tracking-[0.08em] uppercase" :class="result.available ? 'text-foreground' : 'text-primary-400'">
               {{ result.available ? t('analyzer.downloadable') : t('analyzer.notDownloadable') }}
             </span>
           </div>
@@ -1240,8 +1240,8 @@ async function pasteLink() {
                 </svg>
                 SPOTIFY {{ spotifyResult.type?.toUpperCase() }}
               </span>
-              <span v-if="spotifyResult.type === 'playlist' && spotifyResult.data?.public === true" class="px-1.5 py-0.5 bg-green-500/10 text-green-400 border border-green-500/30 font-mono text-[10px] tracking-[0.08em] font-semibold uppercase">{{ t('analyzer.fields.public') }}</span>
-              <span v-if="spotifyResult.type === 'playlist' && spotifyResult.data?.public === false" class="px-1.5 py-0.5 bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 font-mono text-[10px] tracking-[0.08em] font-semibold uppercase">{{ t('common.private') }}</span>
+              <span v-if="spotifyResult.type === 'playlist' && spotifyResult.data?.public === true" class="px-1.5 py-0.5 bg-hover text-foreground border border-line-strong font-mono text-[10px] tracking-[0.08em] font-semibold uppercase">{{ t('analyzer.fields.public') }}</span>
+              <span v-if="spotifyResult.type === 'playlist' && spotifyResult.data?.public === false" class="px-1.5 py-0.5 bg-primary-500/10 text-primary-400 border border-primary-500/40 font-mono text-[10px] tracking-[0.08em] font-semibold uppercase">{{ t('common.private') }}</span>
               <h2 class="text-2xl font-bold truncate">{{ spotifyResult.data?.name }}</h2>
               <p v-if="spotifyResult.data?.artists?.[0]?.name || spotifyResult.data?.owner?.display_name" class="text-lg text-foreground-muted truncate">
                 {{ spotifyResult.data?.artists?.[0]?.name || spotifyResult.data?.owner?.display_name }}
@@ -1273,7 +1273,7 @@ async function pasteLink() {
                 {{ svc }}
               </button>
             </div>
-            <p v-if="targetService === 'both' && !(deezerConnected && qobuzConnected)" class="font-mono text-[10px] text-yellow-400/80 mt-1.5">
+            <p v-if="targetService === 'both' && !(deezerConnected && qobuzConnected)" class="font-mono text-[10px] text-primary-400 mt-1.5">
               {{ t('analyzer.compareNeedsBoth') }}
             </p>
           </div>
@@ -1324,7 +1324,7 @@ async function pasteLink() {
               </svg>
               {{ t('analyzer.downloadTracks', { count: conversionResult.matched.length }) }}
             </button>
-            <p v-if="conversionResult && !conversionResult.matched?.length" class="text-sm text-yellow-400">
+            <p v-if="conversionResult && !conversionResult.matched?.length" class="text-sm text-primary-400">
               <template v-if="conversionResult.service === 'both'">{{ t('analyzer.noneFoundBoth') }}</template>
               <template v-else>{{ t('analyzer.noneFoundService', { service: conversionResult.service === 'qobuz' ? 'Qobuz' : 'Deezer' }) }}</template>
             </p>
@@ -1356,7 +1356,7 @@ async function pasteLink() {
       <div v-if="conversionResult" class="border-t border-line pt-6">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-display text-[14px] uppercase tracking-[0.06em]">{{ t('analyzer.conversionResults') }}</h3>
-          <span class="font-mono text-[10px] tracking-[0.08em] uppercase px-1.5 py-0.5 border" :class="conversionResult.matchRate >= 80 ? 'bg-green-500/10 text-green-400 border-green-500/30' : conversionResult.matchRate >= 50 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30'">
+          <span class="font-mono text-[10px] tracking-[0.08em] uppercase px-1.5 py-0.5 border" :class="conversionResult.matchRate >= 80 ? 'bg-hover text-foreground border-line-strong' : conversionResult.matchRate >= 50 ? 'bg-primary-500/10 text-primary-400 border-primary-500/40' : 'bg-primary-500/10 text-primary-400 border-primary-500/30'">
             {{ conversionResult.matchRate }}% matched
           </span>
         </div>
@@ -1365,7 +1365,7 @@ async function pasteLink() {
         <div v-if="conversionResult.service === 'both' && conversionResult.matched?.length" class="space-y-3 mb-4">
           <!-- summary tally -->
           <div class="flex flex-wrap items-center gap-x-4 gap-y-1 p-2.5 bg-background-main border border-line text-[11px] text-foreground-muted">
-            <span><span class="inline-block w-2 h-2 rounded-sm bg-green-400 mr-1.5 align-middle"></span><b class="text-foreground">{{ conversionResult.summary?.both || 0 }}</b> {{ t('analyzer.onBoth') }}</span>
+            <span><span class="inline-block w-2 h-2 rounded-sm bg-foreground mr-1.5 align-middle"></span><b class="text-foreground">{{ conversionResult.summary?.both || 0 }}</b> {{ t('analyzer.onBoth') }}</span>
             <span><span class="inline-block w-2 h-2 rounded-sm bg-qobuz-500 mr-1.5 align-middle"></span><b class="text-foreground">{{ conversionResult.summary?.qobuzOnly || 0 }}</b> {{ t('analyzer.qobuzOnly') }}</span>
             <span><span class="inline-block w-2 h-2 rounded-sm bg-deezer-500 mr-1.5 align-middle"></span><b class="text-foreground">{{ conversionResult.summary?.deezerOnly || 0 }}</b> {{ t('analyzer.deezerOnly') }}</span>
             <span><span class="inline-block w-2 h-2 rounded-sm bg-white/20 mr-1.5 align-middle"></span><b class="text-foreground">{{ conversionResult.summary?.neither || 0 }}</b> {{ t('analyzer.unavailable') }}</span>
@@ -1434,7 +1434,7 @@ async function pasteLink() {
               :key="match.spotify?.id || match.spotifyTrack?.id"
               class="flex items-center gap-3 p-2 bg-background-main border border-line"
             >
-              <svg class="w-4 h-4 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="w-4 h-4 text-foreground flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
               <span class="truncate text-sm">{{ match.spotify?.name || match.spotifyTrack?.name }}</span>
@@ -1452,7 +1452,7 @@ async function pasteLink() {
               :key="track.id"
               class="flex items-center gap-3 p-2 bg-background-main border border-line"
             >
-              <svg class="w-4 h-4 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="w-4 h-4 text-primary-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
               <span class="truncate text-sm text-foreground-muted">{{ track.name }}<template v-if="track.artist"> - {{ track.artist }}</template></span>

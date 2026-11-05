@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain, shell, dialog, Menu, session, safeStorage, clipboard } from 'electron'
+import { accessControl, AuthError } from './services/accessControl'
 import { join, normalize, resolve } from 'path'
 import { rm, stat, readFile, writeFile, mkdir, rename } from 'fs/promises'
 import { existsSync } from 'fs'
@@ -646,6 +647,22 @@ ipcMain.handle('window:close', () => {
 ipcMain.handle('window:isMaximized', () => {
   return mainWindow?.isMaximized()
 })
+
+// Garimpo account (access control)
+const authResult = async (fn: () => Promise<unknown>) => {
+  try {
+    const state = await fn()
+    return { ok: true, state: state ?? accessControl.state() }
+  } catch (e) {
+    return { ok: false, error: e instanceof AuthError ? e.code : 'E_UNKNOWN', state: accessControl.state() }
+  }
+}
+ipcMain.handle('auth:state', () => authResult(() => accessControl.restore()))
+ipcMain.handle('auth:signIn', (_, email: string, password: string) => authResult(() => accessControl.signIn(String(email || ''), String(password || ''))))
+ipcMain.handle('auth:signOut', () => authResult(() => accessControl.signOut()))
+ipcMain.handle('auth:resetPassword', (_, email: string) => authResult(async () => { await accessControl.resetPassword(String(email || '')) }))
+ipcMain.handle('auth:refresh', () => authResult(() => accessControl.refresh()))
+ipcMain.handle('auth:logModule', (_, module: string) => { accessControl.log('module', String(module || '')).catch(() => {}); return true })
 
 ipcMain.handle('dialog:selectFile', async (_, opts?: { title?: string; extensions?: string[]; defaultPath?: string }) => {
   const result = await dialog.showOpenDialog(mainWindow!, {

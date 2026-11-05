@@ -22,7 +22,7 @@ const showBackOnline = computed(() => isOnline.value && wasOffline.value)
   >
     <div
       v-if="showBanner"
-      class="fixed top-0 left-0 right-0 z-50 bg-red-500 text-white px-4 py-2 flex items-center justify-center gap-2 shadow-lg"
+      class="fixed top-0 left-0 right-0 z-50 bg-primary-500 text-white px-4 py-2 flex items-center justify-center gap-2 shadow-lg"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -44,7 +44,7 @@ const showBackOnline = computed(() => isOnline.value && wasOffline.value)
   >
     <div
       v-if="showBackOnline"
-      class="fixed top-0 left-0 right-0 z-50 bg-green-500 text-white px-4 py-2 flex items-center justify-center gap-2 shadow-lg"
+      class="fixed top-0 left-0 right-0 z-50 bg-foreground text-background-main px-4 py-2 flex items-center justify-center gap-2 shadow-lg"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

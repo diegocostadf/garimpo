@@ -426,9 +426,9 @@ function surfaceRestoreResult(result: ApplyResult) {
         <label class="flex items-center justify-between text-sm pt-1 border-t border-line">
           <span class="flex items-center gap-2">
             <input type="checkbox" v-model="exportSelected.credentials" class="accent-amber-500" />
-            <span class="text-amber-400">{{ t('settings.backup.segment.credentials') }}</span>
+            <span class="text-primary-400">{{ t('settings.backup.segment.credentials') }}</span>
           </span>
-          <span class="text-xs text-amber-500">{{ t('settings.backup.credentialsWarning') }}</span>
+          <span class="text-xs text-primary-400">{{ t('settings.backup.credentialsWarning') }}</span>
         </label>
       </div>
 
@@ -477,7 +477,7 @@ function surfaceRestoreResult(result: ApplyResult) {
               <div>{{ t('settings.backup.restoreAppVersion') }}: {{ restoreFile.appVersion }}</div>
             </div>
 
-            <div v-if="appVersionWarning" class="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-2">
+            <div v-if="appVersionWarning" class="text-xs text-primary-400 bg-primary-500/10 border border-primary-500/40 rounded px-3 py-2">
               {{ t('settings.backup.restoreNewerVersionWarning') }}
             </div>
 
@@ -567,7 +567,7 @@ function surfaceRestoreResult(result: ApplyResult) {
               <label class="flex items-center justify-between text-sm pt-1 border-t border-line" :class="{ 'opacity-40': restoreCounts.credentials === 0 }">
                 <span class="flex items-center gap-2">
                   <input type="checkbox" v-model="restoreSelected.credentials" :disabled="restoreCounts.credentials === 0" class="accent-amber-500" />
-                  <span class="text-amber-400">{{ t('settings.backup.segment.credentials') }}</span>
+                  <span class="text-primary-400">{{ t('settings.backup.segment.credentials') }}</span>
                 </span>
                 <span class="text-xs">{{ restoreCounts.credentials > 0 ? t('settings.backup.present') : t('settings.backup.notPresent') }}</span>
               </label>

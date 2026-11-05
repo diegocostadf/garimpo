@@ -551,7 +551,7 @@ async function importFromDeezer() {
           v-if="authStore.isLoggedIn && activeTab !== 'artists' && ((activeTab === 'tracks' && favoritesStore.favoriteTracks.length > 0) || (activeTab === 'albums' && favoritesStore.favoriteAlbums.length > 0) || (activeTab === 'playlists' && favoritesStore.favoritePlaylists.length > 0))"
           @click="downloadAllFavorites"
           :disabled="isDownloading"
-          class="flex items-center gap-2 px-4 py-2 font-mono text-[10.5px] tracking-[0.1em] uppercase border bg-green-500/10 text-green-400 border-green-500/30 hover:bg-green-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="flex items-center gap-2 px-4 py-2 font-mono text-[10.5px] tracking-[0.1em] uppercase border bg-hover text-foreground border-line-strong hover:bg-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg v-if="isDownloading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -566,7 +566,7 @@ async function importFromDeezer() {
           v-if="activeTab === 'playlists' && favoritesStore.favoritePlaylists.length > 0"
           @click="syncAllFavorites"
           :disabled="isBulkSyncing"
-          class="flex items-center gap-2 px-4 py-2 font-mono text-[10.5px] tracking-[0.1em] uppercase border bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="flex items-center gap-2 px-4 py-2 font-mono text-[10.5px] tracking-[0.1em] uppercase border bg-hover text-foreground-muted border-line-strong hover:bg-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg v-if="isBulkSyncing" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -581,7 +581,7 @@ async function importFromDeezer() {
           v-if="activeTab === 'artists' && favoritesStore.favoriteArtists.length > 0"
           @click="syncAllFavoriteArtists"
           :disabled="isBulkSyncing"
-          class="flex items-center gap-2 px-4 py-2 font-mono text-[10.5px] tracking-[0.1em] uppercase border bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="flex items-center gap-2 px-4 py-2 font-mono text-[10.5px] tracking-[0.1em] uppercase border bg-hover text-foreground-muted border-line-strong hover:bg-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg v-if="isBulkSyncing" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -618,7 +618,7 @@ async function importFromDeezer() {
         @click="activeTab = tab.id as typeof activeTab"
         class="px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] border transition-colors flex items-center gap-2"
         :class="activeTab === tab.id
-          ? 'text-primary-500 border-primary-500/60 bg-primary-500/10'
+          ? 'text-primary-400 border-primary-500/60 bg-primary-500/10'
           : 'text-foreground-muted border-line hover:text-foreground hover:border-line-strong'"
       >
         {{ tab.label }}
@@ -702,7 +702,7 @@ async function importFromDeezer() {
                any artist-sync entry sourced from this artist. -->
           <button
             @click="unfavoriteArtist(artist)"
-            class="absolute top-2 left-2 w-7 h-7 bg-black/70 backdrop-blur-sm text-white hover:bg-red-500/90 transition-colors flex items-center justify-center border border-line"
+            class="absolute top-2 left-2 w-7 h-7 bg-black/70 backdrop-blur-sm text-white hover:bg-primary-500/90 transition-colors flex items-center justify-center border border-line"
             :title="t('favorites.removeFromFavoritesTooltip')"
           >
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -714,10 +714,10 @@ async function importFromDeezer() {
             v-if="getArtistSyncStatus(artist.id) !== 'none'"
             class="absolute top-2 right-2 px-1.5 py-0.5 font-mono text-[10px] tracking-[0.08em] uppercase border backdrop-blur-sm pointer-events-none flex items-center gap-1"
             :class="{
-              'bg-blue-500/90 text-white border-blue-400/50': getArtistSyncStatus(artist.id) === 'syncing',
-              'bg-green-500/90 text-white border-green-400/50': getArtistSyncStatus(artist.id) === 'success',
-              'bg-yellow-500/90 text-black border-yellow-300/50': getArtistSyncStatus(artist.id) === 'partial',
-              'bg-red-500/90 text-white border-red-400/50': getArtistSyncStatus(artist.id) === 'error',
+              'bg-background-main/90 text-foreground border-line-strong': getArtistSyncStatus(artist.id) === 'syncing',
+              'bg-foreground/90 text-background-main border-foreground': getArtistSyncStatus(artist.id) === 'success',
+              'bg-primary-500/90 text-white border-primary-400': getArtistSyncStatus(artist.id) === 'partial',
+              'bg-primary-500/90 text-white border-primary-500/50': getArtistSyncStatus(artist.id) === 'error',
               'bg-background-main/80 text-foreground-muted border-line': getArtistSyncStatus(artist.id) === 'pending'
             }"
             :title="
@@ -756,8 +756,8 @@ async function importFromDeezer() {
             :disabled="artistSyncStore.isLoading"
             class="w-full px-2 py-1 font-mono text-[10px] tracking-[0.1em] uppercase border transition-colors group"
             :class="getArtistSyncStatus(artist.id) === 'none'
-              ? 'bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20'
-              : 'bg-background-main/60 text-foreground-muted border-line hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30'"
+              ? 'bg-hover text-foreground-muted border-line-strong hover:bg-hover'
+              : 'bg-background-main/60 text-foreground-muted border-line hover:bg-primary-500/20 hover:text-primary-400 hover:border-primary-500/30'"
             :title="getArtistSyncStatus(artist.id) === 'none' ? t('favorites.pinArtistTooltip') : t('favorites.unpinArtistTooltip')"
           >
             <span v-if="getArtistSyncStatus(artist.id) === 'none'">{{ t('favorites.pinArtistToSync') }}</span>
@@ -797,7 +797,7 @@ async function importFromDeezer() {
                any sync entry sourced from this playlist. -->
           <button
             @click="unfavoritePlaylist(playlist)"
-            class="absolute top-2 left-2 w-7 h-7 bg-black/70 backdrop-blur-sm text-white hover:bg-red-500/90 transition-colors flex items-center justify-center border border-line"
+            class="absolute top-2 left-2 w-7 h-7 bg-black/70 backdrop-blur-sm text-white hover:bg-primary-500/90 transition-colors flex items-center justify-center border border-line"
             :title="t('favorites.removeFromFavoritesTooltip')"
           >
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -809,10 +809,10 @@ async function importFromDeezer() {
             v-if="getSyncStatus(playlist.id) !== 'none'"
             class="absolute top-2 right-2 px-1.5 py-0.5 font-mono text-[10px] tracking-[0.08em] uppercase border backdrop-blur-sm pointer-events-none flex items-center gap-1"
             :class="{
-              'bg-blue-500/90 text-white border-blue-400/50': getSyncStatus(playlist.id) === 'syncing',
-              'bg-green-500/90 text-white border-green-400/50': getSyncStatus(playlist.id) === 'success',
-              'bg-yellow-500/90 text-black border-yellow-300/50': getSyncStatus(playlist.id) === 'partial',
-              'bg-red-500/90 text-white border-red-400/50': getSyncStatus(playlist.id) === 'error',
+              'bg-background-main/90 text-foreground border-line-strong': getSyncStatus(playlist.id) === 'syncing',
+              'bg-foreground/90 text-background-main border-foreground': getSyncStatus(playlist.id) === 'success',
+              'bg-primary-500/90 text-white border-primary-400': getSyncStatus(playlist.id) === 'partial',
+              'bg-primary-500/90 text-white border-primary-500/50': getSyncStatus(playlist.id) === 'error',
               'bg-background-main/80 text-foreground-muted border-line': getSyncStatus(playlist.id) === 'pending'
             }"
             :title="
@@ -851,8 +851,8 @@ async function importFromDeezer() {
             :disabled="syncStore.isLoading"
             class="w-full px-2 py-1 font-mono text-[10px] tracking-[0.1em] uppercase border transition-colors group"
             :class="getSyncStatus(playlist.id) === 'none'
-              ? 'bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20'
-              : 'bg-background-main/60 text-foreground-muted border-line hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30'"
+              ? 'bg-hover text-foreground-muted border-line-strong hover:bg-hover'
+              : 'bg-background-main/60 text-foreground-muted border-line hover:bg-primary-500/20 hover:text-primary-400 hover:border-primary-500/30'"
             :title="getSyncStatus(playlist.id) === 'none' ? t('favorites.syncPlaylistTooltip') : t('favorites.unsyncPlaylistTooltip')"
           >
             <span v-if="getSyncStatus(playlist.id) === 'none'">{{ t('favorites.syncPlaylist') }}</span>
@@ -934,7 +934,7 @@ async function importFromDeezer() {
               <button
                 @click="confirmPinMode"
                 :disabled="pinModalMode === 'date-threshold' && !pinModalDate"
-                class="px-4 py-2 font-mono text-[11px] tracking-[0.1em] uppercase border bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                class="px-4 py-2 font-mono text-[11px] tracking-[0.1em] uppercase border bg-hover text-foreground-muted border-line-strong hover:bg-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {{ t('sync.pinModeConfirm') }}
               </button>

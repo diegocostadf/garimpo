@@ -11,6 +11,8 @@ import SpotifyWizard from './components/SpotifyWizard.vue'
 import { useWizardStore } from './stores/wizardStore'
 import ToastContainer from './components/ToastContainer.vue'
 import UpdateDialog from './components/UpdateDialog.vue'
+import AccountGate from './components/AccountGate.vue'
+import { useAccountStore } from './stores/accountStore'
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal.vue'
 import OfflineBanner from './components/OfflineBanner.vue'
 import { useDownloadStore } from './stores/downloadStore'
@@ -92,8 +94,13 @@ const handleBeforeUnload = () => {
   }
 }
 
+const accountStore = useAccountStore()
+
 onMounted(async () => {
   console.log('[App] Starting initialization...')
+
+  // Garimpo account first: without access, nothing else needs to load.
+  await accountStore.init()
 
   // Initialize stores - settings must load first since auth depends on saved ARL
   loadingMessage.value = t('app.loadingSettings')
@@ -202,6 +209,7 @@ onBeforeUnmount(() => {
   <div class="flex flex-col h-screen bg-background-main text-foreground">
     <!-- Toast Notifications -->
     <ToastContainer />
+    <AccountGate v-if="accountStore.ready && !accountStore.canUseApp" />
     <UpdateDialog />
     <DeezerWizard :show="wizardStore.deezerOpen" @close="wizardStore.deezerOpen = false" />
     <SpotifyWizard :show="wizardStore.spotifyOpen" @close="wizardStore.spotifyOpen = false" />
@@ -230,7 +238,7 @@ onBeforeUnmount(() => {
     <transition name="slide-down">
       <div
         v-if="showAuthExpiredBanner"
-        class="bg-red-600 text-white px-4 py-3 flex items-center justify-between z-50"
+        class="bg-primary-600 text-white px-4 py-3 flex items-center justify-between z-50"
       >
         <div class="flex items-center gap-3">
           <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -242,13 +250,13 @@ onBeforeUnmount(() => {
         <div class="flex items-center gap-2">
           <button
             @click="goToLogin"
-            class="px-3 py-1 bg-white text-red-600 rounded-md text-sm font-medium hover:bg-red-50 transition-colors"
+            class="px-3 py-1 bg-white text-primary-400 rounded-md text-sm font-medium hover:bg-primary-500 transition-colors"
           >
             {{ t('login.logIn') }}
           </button>
           <button
             @click="dismissAuthExpiredBanner"
-            class="p-1 hover:bg-red-700 rounded transition-colors"
+            class="p-1 hover:bg-primary-600 rounded transition-colors"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

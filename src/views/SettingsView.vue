@@ -12,6 +12,8 @@ import FlagIcon from '../components/FlagIcon.vue'
 import ProfileSelector from '../components/ProfileSelector.vue'
 import BackupRestore from '../components/BackupRestore.vue'
 import AboutView from './AboutView.vue'
+import { useQuality, isAllowed, qualityLabel as qualityLabelOf } from '../composables/useQuality'
+import { useAccountStore } from '../stores/accountStore'
 import { useRoute } from 'vue-router'
 import { useContextMenu } from '../composables/useContextMenu'
 
@@ -173,7 +175,17 @@ const sectionTabs: Record<SettingsTab, string[]> = {
 }
 const route = useRoute()
 const requestedTab = route.query.tab as SettingsTab | undefined
+const garimpoAccount = useAccountStore()
+const quality = useQuality()
+const showArlField = ref(false)
+const spotifyLinked = computed(() => !!(settingsStore.settings.spotifyClientId && settingsStore.settings.spotifyClientSecret))
+const allow320 = computed(() => isAllowed('320', quality.accountMax.value))
+const allowFlac = computed(() => isAllowed('flac', quality.accountMax.value))
 const activeTab = ref<SettingsTab>(requestedTab && requestedTab in sectionTabs ? requestedTab : (authStore.isLoggedIn ? 'downloads' : 'accounts'))
+// Links like /settings?tab=accounts also work while Settings is already open.
+watch(() => route.query.tab, (tab) => {
+  if (typeof tab === 'string' && tab in sectionTabs) activeTab.value = tab as SettingsTab
+})
 const settingsTabs = computed(() => [
   { id: 'accounts' as SettingsTab, label: t('settings.tabs.accounts') },
   { id: 'downloads' as SettingsTab, label: t('downloads.title') },
@@ -754,14 +766,14 @@ async function reindexLibrary() {
           />
           <button
             @click="settingsStore.selectDownloadPath()"
-            class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors"
+            class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
           >
             {{ t('common.browse') }}
           </button>
           <button
             v-if="settingsStore.settings.downloadPath"
             @click="settingsStore.openDownloadPath()"
-            class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors"
+            class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
             :title="t('settings.openFolder')"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -808,9 +820,10 @@ async function reindexLibrary() {
           class="w-full px-3 py-2 bg-background-main/60 text-sm border border-line focus:border-primary-500/50 outline-none"
         >
           <option value="128">{{ t('settings.bitrateOptions.mp3_128') }}</option>
-          <option value="320">{{ t('settings.bitrateOptions.mp3_320') }}</option>
-          <option value="flac">{{ t('settings.bitrateOptions.flac') }}</option>
+          <option value="320" :disabled="!allow320">{{ t('settings.bitrateOptions.mp3_320') }}<template v-if="!allow320"> · {{ t('settings.needsPlan') }}</template></option>
+          <option value="flac" :disabled="!allowFlac">{{ t('settings.bitrateOptions.flac') }}<template v-if="!allowFlac"> · {{ t('settings.needsPlan') }}</template></option>
         </select>
+        <p v-if="quality.capped.value" class="text-xs text-primary-400 mt-1" data-testid="quality-capped">{{ t('settings.qualityCapped', { quality: quality.label.value }) }}</p>
       </div>
 
       <!-- Overwrite Files -->
@@ -843,7 +856,7 @@ async function reindexLibrary() {
           <button
             @click="reindexLibrary"
             :disabled="reindexing"
-            class="px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] bg-background-main/60 border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 disabled:opacity-50 transition-colors"
+            class="px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] bg-background-main/60 border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 disabled:opacity-50 transition-colors"
           >
             {{ reindexing ? t('settings.reindexingLibrary') : t('settings.reindexLibrary') }}
           </button>
@@ -1123,7 +1136,7 @@ async function reindexLibrary() {
               v-for="variable in templateVariables"
               :key="'track-' + variable"
               @click="insertVariable('trackNameTemplate', variable)"
-              class="font-mono text-[10px] px-2 py-1 bg-background-main border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors"
+              class="font-mono text-[10px] px-2 py-1 bg-background-main border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
             >
               {{ variable }}
             </button>
@@ -1151,7 +1164,7 @@ async function reindexLibrary() {
               v-for="variable in templateVariables"
               :key="'album-' + variable"
               @click="insertVariable('albumTrackTemplate', variable)"
-              class="font-mono text-[10px] px-2 py-1 bg-background-main border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors"
+              class="font-mono text-[10px] px-2 py-1 bg-background-main border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
             >
               {{ variable }}
             </button>
@@ -1179,7 +1192,7 @@ async function reindexLibrary() {
               v-for="variable in templateVariables"
               :key="'playlist-' + variable"
               @click="insertVariable('playlistTrackTemplate', variable)"
-              class="font-mono text-[10px] px-2 py-1 bg-background-main border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors"
+              class="font-mono text-[10px] px-2 py-1 bg-background-main border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
             >
               {{ variable }}
             </button>
@@ -1191,7 +1204,7 @@ async function reindexLibrary() {
         <div class="flex justify-end gap-3 pt-4 border-t border-line">
           <button
             @click="resetTemplates"
-            class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors"
+            class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
           >
             {{ t('settings.resetToDefault') }}
           </button>
@@ -1673,11 +1686,11 @@ async function reindexLibrary() {
             <template v-else-if="updateStore.status.state === 'downloading'">{{ t('updates.downloading', { percent: updateStore.status.progress ?? 0 }) }}</template>
             <template v-else-if="updateStore.status.state === 'ready'">
               {{ t('updates.ready', { version: updateStore.status.latest ?? '' }) }}
-              <button type="button" class="text-primary-500 hover:underline ml-1" @click="updateStore.dialogOpen = true">{{ t('updates.restartNow') }}</button>
+              <button type="button" class="text-primary-400 hover:underline ml-1" @click="updateStore.dialogOpen = true">{{ t('updates.restartNow') }}</button>
             </template>
             <template v-else-if="updateStore.status.state === 'available'">
               {{ updateStore.status.latest === updateStore.skippedVersion ? t('updates.skipped', { version: updateStore.status.latest ?? '' }) : t('updates.statusAvailable', { version: updateStore.status.latest ?? '' }) }}
-              <button type="button" class="text-primary-500 hover:underline ml-1" @click="updateStore.dialogOpen = true">{{ t('updates.updateNow') }}</button>
+              <button type="button" class="text-primary-400 hover:underline ml-1" @click="updateStore.dialogOpen = true">{{ t('updates.updateNow') }}</button>
             </template>
           </p>
         </div>
@@ -1848,6 +1861,32 @@ async function reindexLibrary() {
     </section>
 
     <!-- Account Settings -->
+    <!-- Garimpo account (access control) -->
+    <section v-if="!settingsSearch && activeTab === 'accounts'" class="card flex flex-wrap items-center gap-5" data-testid="garimpo-account">
+      <div class="flex-1 min-w-[240px] flex flex-col gap-1">
+        <span class="font-mono text-[11px] uppercase text-foreground-muted">{{ t('account.cardLabel') }}</span>
+        <template v-if="garimpoAccount.state.mode === 'dev'">
+          <p class="text-sm font-semibold">{{ t('account.devTitle') }}</p>
+          <p class="text-xs text-foreground-muted">{{ t('account.devBody') }}</p>
+        </template>
+        <template v-else-if="garimpoAccount.state.user">
+          <p class="text-sm font-semibold">{{ garimpoAccount.state.user.email }}</p>
+          <p class="font-mono text-[11px] uppercase text-foreground-muted">
+            {{ t('account.plan') }}: <span class="text-primary-400">{{ garimpoAccount.state.profile?.plan }}</span>
+            <template v-if="garimpoAccount.state.profile?.expires_at"> · {{ t('account.until', { date: new Date(garimpoAccount.state.profile.expires_at).toLocaleDateString() }) }}</template>
+            <template v-if="garimpoAccount.state.offline"> · {{ t('account.offline') }}</template>
+          </p>
+          <div class="flex flex-wrap gap-1.5 pt-2">
+            <span v-for="m in ['downloads', 'converter', 'dj', 'qobuz']" :key="m" class="h-7 px-3 rounded-full border font-mono text-[10px] uppercase flex items-center" :class="garimpoAccount.has(m as any) ? 'border-line-strong' : 'border-dashed border-line text-foreground-muted line-through'">{{ t(`account.modules.${m}`) }}</span>
+          </div>
+        </template>
+      </div>
+      <div v-if="garimpoAccount.state.mode === 'remote'" class="flex gap-2">
+        <button type="button" @click="garimpoAccount.refresh()" class="h-10 px-4 rounded-full border border-line-strong font-mono text-[11px] uppercase hover:bg-hover">{{ t('account.checkAgain') }}</button>
+        <button type="button" @click="garimpoAccount.signOut()" class="h-10 px-4 rounded-full border border-primary-500/60 text-primary-400 font-mono text-[11px] uppercase hover:bg-hover">{{ t('account.signOut') }}</button>
+      </div>
+    </section>
+
     <section v-if="isSectionVisible('accounts')" class="card">
       <h2
         class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
@@ -1860,11 +1899,28 @@ async function reindexLibrary() {
       </h2>
 
       <div v-show="expandedSections.accounts" class="space-y-6 pt-6">
-        <button type="button" @click="wizardStore.openDeezer()" class="btn btn-primary w-full sm:w-auto flex items-center justify-center gap-2">
+        <!-- Connected: status, no connect button -->
+        <div v-if="authStore.isLoggedIn" class="flex flex-wrap items-center gap-4 p-4 rounded-[20px] bg-background-main/60 border border-line" data-testid="deezer-connected">
+          <img v-if="authStore.user?.picture" :src="authStore.user.picture" alt="" class="w-12 h-12 rounded-full object-cover" />
+          <span v-else class="w-12 h-12 rounded-full bg-hover flex items-center justify-center font-display text-lg">{{ (authStore.user?.name || '?').slice(0, 1) }}</span>
+          <div class="flex-1 min-w-[200px]">
+            <p class="text-sm font-semibold flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary-500" aria-hidden="true" />{{ t('settings.deezerConnectedAs', { name: authStore.user?.name || '' }) }}</p>
+            <p class="font-mono text-[11px] uppercase text-foreground-muted mt-1">
+              {{ authStore.user?.subscription?.type || '—' }} · {{ t('settings.deezerMaxQuality', { quality: quality.accountMax.value ? qualityLabelOf(quality.accountMax.value) : '—' }) }}<template v-if="authStore.user?.country"> · {{ authStore.user.country }}</template>
+            </p>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" @click="wizardStore.openDeezer()" class="h-10 px-4 rounded-full border border-line-strong font-mono text-[11px] uppercase hover:bg-hover">{{ t('settings.deezerSwitch') }}</button>
+            <button type="button" @click="authStore.logout()" class="h-10 px-4 rounded-full border border-primary-500/60 text-primary-400 font-mono text-[11px] uppercase hover:bg-hover">{{ t('sidebar.logout') }}</button>
+          </div>
+        </div>
+        <button v-else type="button" @click="wizardStore.openDeezer()" class="btn btn-primary w-full sm:w-auto flex items-center justify-center gap-2" data-testid="deezer-connect">
           <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
           {{ t('wizard.deezer.start') }}
         </button>
-        <div>
+        <div class="text-sm">
+          <button v-if="authStore.isLoggedIn" type="button" @click="showArlField = !showArlField" class="font-mono text-[11px] uppercase text-foreground-muted hover:text-foreground">{{ showArlField ? '▾' : '▸' }} {{ t('settings.deezerAdvancedArl') }}</button>
+          <div v-show="!authStore.isLoggedIn || showArlField" :class="authStore.isLoggedIn ? 'pt-4' : ''" data-testid="arl-field">
         <label class="block font-mono text-[9.5px] tracking-[0.2em] uppercase text-foreground-muted mb-2">{{ t('login.arlToken') }}</label>
         <div class="flex gap-2">
           <input
@@ -1878,7 +1934,7 @@ async function reindexLibrary() {
           <button
             type="button"
             @click="pasteArl"
-            class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors"
+            class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
             :title="t('common.pasteFromClipboard')"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1903,13 +1959,13 @@ async function reindexLibrary() {
         </div>
         <!-- Status message -->
         <div v-if="arlMessage" class="mt-2 flex items-center gap-2">
-          <svg v-if="arlStatus === 'success'" class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg v-if="arlStatus === 'success'" class="w-4 h-4 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
-          <svg v-else-if="arlStatus === 'error'" class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg v-else-if="arlStatus === 'error'" class="w-4 h-4 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
-          <span :class="arlStatus === 'success' ? 'text-green-400' : 'text-red-400'" class="text-sm">
+          <span :class="arlStatus === 'success' ? 'text-foreground' : 'text-primary-400'" class="text-sm">
             {{ arlMessage }}
           </span>
         </div>
@@ -1919,6 +1975,7 @@ async function reindexLibrary() {
           <p class="text-xs text-foreground-muted mt-2 leading-relaxed">
             {{ t('settings.deezerDisclaimer') }}
           </p>
+        </div>
         </div>
       </div>
     </section>
@@ -1943,10 +2000,10 @@ async function reindexLibrary() {
         </p>
 
         <div v-if="settingsStore.isQobuzConnected" class="flex items-center gap-3">
-          <span class="font-mono text-[10.5px] tracking-[0.12em] uppercase text-green-400 border-l-2 border-green-400 pl-2">{{ t('settings.qobuz.connected') }}</span>
+          <span class="font-mono text-[10.5px] tracking-[0.12em] uppercase text-foreground border-l-2 border-line-strong pl-2">{{ t('settings.qobuz.connected') }}</span>
           <button
             @click="disconnectQobuz"
-            class="ml-auto px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-red-400 hover:border-red-400/50 transition-colors"
+            class="ml-auto px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
           >
             {{ t('settings.qobuz.disconnect') }}
           </button>
@@ -1979,7 +2036,7 @@ async function reindexLibrary() {
                 type="button"
                 @click="connectQobuzToken"
                 :disabled="qobuzConnecting || !qobuzTokenInput.trim()"
-                class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-primary-500/50 text-primary-400 hover:bg-primary-500 hover:text-background-main transition-colors disabled:opacity-50"
+                class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-primary-500/50 text-primary-400 hover:bg-primary-500 hover:text-white transition-colors disabled:opacity-50"
               >{{ t('settings.qobuz.tokenConnect') }}</button>
             </div>
             <p class="text-xs text-foreground-muted">{{ t('settings.qobuz.tokenHelp') }}</p>
@@ -2022,7 +2079,7 @@ async function reindexLibrary() {
         </div>
 
         <div v-if="qobuzMessage" class="flex items-center gap-2">
-          <span :class="qobuzStatus === 'success' ? 'text-green-400' : 'text-red-400'" class="text-sm">{{ qobuzMessage }}</span>
+          <span :class="qobuzStatus === 'success' ? 'text-foreground' : 'text-primary-400'" class="text-sm">{{ qobuzMessage }}</span>
         </div>
 
         <p class="text-xs text-foreground-muted pt-3 border-t border-line">
@@ -2043,7 +2100,11 @@ async function reindexLibrary() {
       </h2>
 
       <div v-show="expandedSections.spotify" class="space-y-6 pt-6">
-        <button type="button" @click="wizardStore.openSpotify()" class="btn btn-primary w-full sm:w-auto flex items-center justify-center gap-2">
+        <div v-if="spotifyLinked" class="flex flex-wrap items-center gap-4 p-4 rounded-[20px] bg-background-main/60 border border-line" data-testid="spotify-connected">
+          <p class="flex-1 text-sm font-semibold flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary-500" aria-hidden="true" />{{ t('settings.spotifyConnected', { id: '••••' + (settingsStore.settings.spotifyClientId || '').slice(-4) }) }}</p>
+          <button type="button" @click="wizardStore.openSpotify()" class="h-10 px-4 rounded-full border border-line-strong font-mono text-[11px] uppercase hover:bg-hover">{{ t('settings.spotifyRedo') }}</button>
+        </div>
+        <button v-else type="button" @click="wizardStore.openSpotify()" class="btn btn-primary w-full sm:w-auto flex items-center justify-center gap-2" data-testid="spotify-connect">
           <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
           {{ t('wizard.openAssistant') }}
         </button>
@@ -2067,7 +2128,7 @@ async function reindexLibrary() {
           <button
             type="button"
             @click="pasteSpotifyClientId"
-            class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors"
+            class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
             :title="t('common.pasteFromClipboard')"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -2090,7 +2151,7 @@ async function reindexLibrary() {
           <button
             type="button"
             @click="pasteSpotifyClientSecret"
-            class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors"
+            class="px-3 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
             :title="t('common.pasteFromClipboard')"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -2132,13 +2193,13 @@ async function reindexLibrary() {
 
         <!-- Status message -->
         <div v-if="spotifyMessage" class="flex items-center gap-2">
-          <svg v-if="spotifyStatus === 'success'" class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg v-if="spotifyStatus === 'success'" class="w-4 h-4 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
-          <svg v-else-if="spotifyStatus === 'error'" class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg v-else-if="spotifyStatus === 'error'" class="w-4 h-4 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
-          <span :class="spotifyStatus === 'success' ? 'text-green-400' : 'text-red-400'" class="text-sm">
+          <span :class="spotifyStatus === 'success' ? 'text-foreground' : 'text-primary-400'" class="text-sm">
             {{ spotifyMessage }}
           </span>
         </div>
@@ -2197,7 +2258,7 @@ async function reindexLibrary() {
     <div class="flex justify-end">
       <button
         @click="settingsStore.resetSettings()"
-        class="px-4 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-red-500/30 text-red-400 hover:text-red-300 hover:border-red-500/50 transition-colors"
+        class="px-4 py-2 font-mono text-[10.5px] uppercase tracking-[0.12em] border border-primary-500/30 text-primary-400 hover:text-primary-400 hover:border-primary-500/50 transition-colors"
       >
         {{ t('settings.resetToDefaults') }}
       </button>

@@ -70,6 +70,8 @@ export interface DeezerUser {
   country?: string
   canStream: boolean
   canDownload: boolean
+  /** Best quality this account may download: free accounts are limited to MP3 128. */
+  maxQuality?: '128' | '320' | 'flac'
   subscription?: {
     type: string
     expires?: string
@@ -537,6 +539,7 @@ export class DeezerAuth extends EventEmitter {
           country: user.SETTING?.global?.language?.country || user.COUNTRY,
           canStream: streamingRights.canStreamHQ || streamingRights.canStreamLossless,
           canDownload: true,
+          maxQuality: streamingRights.canDownloadLossless ? 'flac' : streamingRights.canDownloadHQ ? '320' : '128',
           subscription: {
             type: userData.results.OFFER_INFOS?.OFFER_NAME || (streamingRights.canStreamLossless ? 'HiFi' : streamingRights.canStreamHQ ? 'Premium' : 'Free'),
             expires: userData.results.OFFER_INFOS?.EXPIRE_DATE

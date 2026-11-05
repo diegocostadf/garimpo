@@ -801,7 +801,7 @@ const contextMenuItems = computed(() => {
               <button
                 type="button"
                 @click.stop="clearHistory"
-                class="font-mono text-[9.5px] tracking-[0.12em] uppercase text-foreground-muted hover:text-red-400 transition-colors"
+                class="font-mono text-[9.5px] tracking-[0.12em] uppercase text-foreground-muted hover:text-primary-400 transition-colors"
               >
                 {{ t('search.clearHistory') }}
               </button>
@@ -842,7 +842,7 @@ const contextMenuItems = computed(() => {
             @click="changeTab(tab.id as typeof activeTab)"
             class="px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] border transition-colors flex items-center gap-2"
             :class="activeTab === tab.id
-              ? 'text-primary-500 border-primary-500/60 bg-primary-500/10'
+              ? 'text-primary-400 border-primary-500/60 bg-primary-500/10'
               : 'text-foreground-muted border-line hover:text-foreground hover:border-line-strong'"
           >
             {{ tab.label }}
@@ -862,7 +862,7 @@ const contextMenuItems = computed(() => {
           @click="toggleSelectionMode"
           class="px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] border transition-colors flex items-center gap-2"
           :class="isSelectionMode
-            ? 'text-primary-500 border-primary-500/60 bg-primary-500/10'
+            ? 'text-primary-400 border-primary-500/60 bg-primary-500/10'
             : 'text-foreground-muted border-line hover:text-foreground hover:border-line-strong'"
         >
           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -966,7 +966,7 @@ const contextMenuItems = computed(() => {
               @click="toggleTrackSelection(track.id)"
               class="flex-shrink-0 w-5 h-5 border flex items-center justify-center transition-all ml-2"
               :class="selectedTracks.has(track.id)
-                ? 'bg-primary-500 border-primary-500 text-background-main'
+                ? 'bg-primary-500 border-primary-500 text-white'
                 : 'border-foreground-muted/50 hover:border-primary-400'"
             >
               <svg v-if="selectedTracks.has(track.id)" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -983,7 +983,7 @@ const contextMenuItems = computed(() => {
           <button
             @click="loadMore('track')"
             :disabled="pagination.tracks.loading"
-            class="px-8 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors disabled:opacity-50"
+            class="px-8 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors disabled:opacity-50"
           >
             <span v-if="pagination.tracks.loading" class="flex items-center gap-2">
               <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -1041,7 +1041,7 @@ const contextMenuItems = computed(() => {
           <button
             @click="loadMore('album')"
             :disabled="pagination.albums.loading"
-            class="px-8 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors disabled:opacity-50"
+            class="px-8 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors disabled:opacity-50"
           >
             <span v-if="pagination.albums.loading" class="flex items-center gap-2">
               <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -1076,7 +1076,7 @@ const contextMenuItems = computed(() => {
           <button
             @click="loadMore('artist')"
             :disabled="pagination.artists.loading"
-            class="px-8 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors disabled:opacity-50"
+            class="px-8 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors disabled:opacity-50"
           >
             <span v-if="pagination.artists.loading" class="flex items-center gap-2">
               <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -1121,7 +1121,7 @@ const contextMenuItems = computed(() => {
           <button
             @click="loadMore('playlist')"
             :disabled="pagination.playlists.loading"
-            class="px-8 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors disabled:opacity-50"
+            class="px-8 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors disabled:opacity-50"
           >
             <span v-if="pagination.playlists.loading" class="flex items-center gap-2">
               <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">

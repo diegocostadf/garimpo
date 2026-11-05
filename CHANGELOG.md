@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0] - 2026-11-05
+
+### Added
+- Conta Garimpo: login com e-mail e senha, recuperação de senha, sessão criptografada, planos e módulos (Downloads, Converter, Estúdio DJ, Qobuz) com cadeado no menu, registro de acessos e modo desenvolvimento quando o login não está configurado.
+- Aviso de nova versão ao abrir e a cada 6 horas, pedindo o download.
+- Instaladores para Mac Intel e Apple Silicon e Windows 10/11 32 e 64 bits, com publicação automática por tag e assinatura ad hoc ou Developer ID.
+
+### Fixed
+- A qualidade de download respeita o plano do Deezer (Free: MP3 128) no download, no selo e no menu; opções acima do plano ficam desabilitadas.
+- Conta Deezer conectada mostra o status e não pede para conectar de novo; o mesmo para o Spotify.
+- Baixar sem Deezer conectado abre o assistente de login.
+- Contraste AA em todas as telas, nos temas claro e escuro, e paleta preto, branco e vermelho em todo o app.
+
 ## [0.2.0] - 2026-11-05
 
 ### Added

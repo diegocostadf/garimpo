@@ -41,9 +41,9 @@ function handleBackdropClick(event: MouseEvent) {
 }
 
 const confirmButtonClasses = {
-  danger: 'border border-red-500/40 text-red-400 hover:bg-red-500 hover:text-white focus:ring-red-500',
-  warning: 'border border-[#ffb454]/40 text-[#ffb454] hover:bg-[#ffb454] hover:text-background-main focus:ring-[#ffb454]',
-  primary: 'bg-primary-500 text-background-main hover:bg-primary-600 focus:ring-primary-500'
+  danger: 'border border-primary-500/40 text-primary-400 hover:bg-primary-500 hover:text-white focus:ring-primary-500',
+  warning: 'border border-primary-500/50 text-primary-400 hover:bg-primary-500 hover:text-white focus:ring-primary-500',
+  primary: 'bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500'
 }
 </script>
 
@@ -70,19 +70,10 @@ const confirmButtonClasses = {
                 <!-- Warning Icon -->
                 <div
                   class="flex-shrink-0 w-10 h-10 flex items-center justify-center"
-                  :class="{
-                    'bg-red-500/20': confirmStyle === 'danger',
-                    'bg-yellow-500/20': confirmStyle === 'warning',
-                    'bg-primary-500/20': confirmStyle === 'primary'
-                  }"
+                  :class="confirmStyle === 'warning' ? 'bg-primary-500/10' : 'bg-primary-500/20'"
                 >
                   <svg
-                    class="w-5 h-5"
-                    :class="{
-                      'text-red-400': confirmStyle === 'danger',
-                      'text-yellow-400': confirmStyle === 'warning',
-                      'text-primary-400': confirmStyle === 'primary'
-                    }"
+                    class="w-5 h-5 text-primary-400"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

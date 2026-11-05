@@ -230,7 +230,7 @@ const contextMenuItems = computed(() => {
           class="w-48 h-48 object-cover border border-line shadow-2xl"
         />
         <div class="flex-1">
-          <p class="font-mono text-[10px] tracking-[0.3em] uppercase text-primary-500 mb-2">{{ t('common.playlist') }}</p>
+          <p class="font-mono text-[10px] tracking-[0.3em] uppercase text-primary-400 mb-2">{{ t('common.playlist') }}</p>
           <h1 class="font-display uppercase text-[34px] leading-[1.02] tracking-[-0.01em] mb-2">{{ playlist.title }}</h1>
           <p v-if="playlist.description" class="text-foreground-muted mb-2">
             {{ playlist.description }}
@@ -244,7 +244,7 @@ const contextMenuItems = computed(() => {
               <router-link
                 v-if="creatorIsBrowsable"
                 :to="`/user/${playlist.creator.id}`"
-                class="hover:text-primary-500 transition-colors underline decoration-dotted underline-offset-4"
+                class="hover:text-primary-400 transition-colors underline decoration-dotted underline-offset-4"
               >{{ playlist.creator.name }}</router-link>
               <template v-else>{{ playlist.creator.name }}</template>
               &bull;
@@ -268,7 +268,7 @@ const contextMenuItems = computed(() => {
                   d="M5 13l4 4L19 7" />
               </svg>
               <!-- Already downloaded indicator -->
-              <svg v-else-if="playlistDownloadState === 'completed'" class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-else-if="playlistDownloadState === 'completed'" class="w-5 h-5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -291,7 +291,7 @@ const contextMenuItems = computed(() => {
               {{ t('retag.refreshTagsAction') }}
             </button>
             <span v-if="trackDiff" class="text-xs text-foreground-muted flex items-center gap-1">
-              <svg class="w-3 h-3 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              <svg class="w-3 h-3 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
               {{ trackDiff.existing }} already downloaded &middot; {{ trackDiff.newTracks }} new
             </span>
             <button
@@ -300,7 +300,7 @@ const contextMenuItems = computed(() => {
             >
               <svg
                 class="w-5 h-5"
-                :class="isFavorite() ? 'fill-primary-500 text-primary-500' : ''"
+                :class="isFavorite() ? 'fill-primary-500 text-primary-400' : ''"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

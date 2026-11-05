@@ -10,11 +10,9 @@ echo "  Garimpo · instalação"
 echo "  --------------------"
 echo ""
 
-if [ "$(uname -m)" != "arm64" ]; then
-  echo "Este script compila para Macs com Apple Silicon (M1 ou mais novo)."
-  echo "Em Mac Intel, rode: npm install && npx vite build && npx electron-builder --mac dir --x64"
-  exit 1
-fi
+# Apple Silicon (arm64) ou Intel (x64)
+if [ "$(uname -m)" = "arm64" ]; then ARCH="arm64"; DIR="mac-arm64"; else ARCH="x64"; DIR="mac"; fi
+echo "Mac detectado: $ARCH"
 
 if command -v bun >/dev/null 2>&1; then
   RUN="bun"
@@ -42,10 +40,11 @@ OUT="$HOME/Library/Caches/garimpo-build"
 rm -rf dist dist-electron release "$OUT"
 npx vite build
 xattr -cr dist dist-electron public 2>/dev/null || true
-CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac dir --arm64 \
-  -c.mac.notarize=false -c.directories.output="$OUT"
+# Assinatura local: ad hoc (sem conta Apple), suficiente para rodar neste Mac.
+CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac dir --$ARCH \
+  -c.mac.notarize=false -c.mac.identity=- -c.directories.output="$OUT" --publish never
 
-BUILT="$OUT/mac-arm64/Garimpo.app"
+BUILT="$OUT/$DIR/Garimpo.app"
 if [ ! -d "$BUILT" ]; then
   echo "A compilação terminou sem gerar o app. Veja as mensagens acima."
   read -n 1 -s -r -p "Pressione qualquer tecla para fechar."

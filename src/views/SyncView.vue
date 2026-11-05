@@ -394,7 +394,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
         <button
           v-if="syncStore.playlists.length > 0"
           @click="syncStore.syncAll()"
-          class="flex items-center gap-2 px-3 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors"
+          class="flex items-center gap-2 px-3 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
         >
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -444,7 +444,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
       </select>
       <button
         @click="playlistSortDir = playlistSortDir === 'asc' ? 'desc' : 'asc'"
-        class="p-2 bg-background-main border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors"
+        class="p-2 bg-background-main border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
         v-tooltip="t('sync.sortBy')"
       >
         <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': playlistSortDir === 'desc' }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -458,12 +458,12 @@ function getScheduleLabel(schedule: SyncSchedule): string {
       <div class="flex items-start gap-4">
         <!-- Source Icon -->
         <div class="w-10 h-10 flex items-center justify-center flex-shrink-0 border border-line"
-          :class="playlist.source === 'spotify' ? 'bg-green-500/10' : 'bg-purple-500/10'"
+          :class="playlist.source === 'spotify' ? 'bg-hover' : 'bg-hover'"
         >
-          <svg v-if="playlist.source === 'spotify'" class="w-5 h-5 text-green-400" viewBox="0 0 24 24" fill="currentColor">
+          <svg v-if="playlist.source === 'spotify'" class="w-5 h-5 text-foreground" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
           </svg>
-          <svg v-else class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg v-else class="w-5 h-5 text-foreground-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
           </svg>
         </div>
@@ -476,9 +476,9 @@ function getScheduleLabel(schedule: SyncSchedule): string {
               v-if="playlist.lastSyncStatus"
               class="px-1.5 py-0.5 font-mono text-[10px] tracking-[0.08em] uppercase border"
               :class="{
-                'bg-green-500/10 text-green-400 border-green-500/30': playlist.lastSyncStatus === 'success',
-                'bg-yellow-500/10 text-yellow-400 border-yellow-500/30': playlist.lastSyncStatus === 'partial',
-                'bg-red-500/10 text-red-400 border-red-500/30': playlist.lastSyncStatus === 'error'
+                'bg-hover text-foreground border-line-strong': playlist.lastSyncStatus === 'success',
+                'bg-primary-500/10 text-primary-400 border-primary-500/40': playlist.lastSyncStatus === 'partial',
+                'bg-primary-500/10 text-primary-400 border-primary-500/30': playlist.lastSyncStatus === 'error'
               }"
             >
               {{ playlist.lastSyncStatus }}
@@ -498,8 +498,8 @@ function getScheduleLabel(schedule: SyncSchedule): string {
             v-if="playlist.lastSyncError && playlist.lastSyncStatus !== 'success'"
             class="mt-2 px-2 py-1.5 text-[12px] leading-relaxed border"
             :class="playlist.lastSyncStatus === 'partial'
-              ? 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20'
-              : 'text-red-400 bg-red-500/10 border-red-500/20'"
+              ? 'text-primary-400 bg-primary-500/10 border-primary-500/40'
+              : 'text-primary-400 bg-primary-500/10 border-primary-500/20'"
           >{{ playlist.lastSyncError }}</p>
 
           <!-- Sync Progress -->
@@ -525,9 +525,9 @@ function getScheduleLabel(schedule: SyncSchedule): string {
           <!-- Stale: source playlist no longer in user's Deezer favorites -->
           <div
             v-if="syncStore.isStale(playlist)"
-            class="mt-2 flex items-center justify-between gap-2 bg-amber-500/10 border border-amber-500/30 px-3 py-2 text-xs"
+            class="mt-2 flex items-center justify-between gap-2 bg-primary-500/10 border border-primary-500/40 px-3 py-2 text-xs"
           >
-            <div class="flex items-center gap-2 text-amber-300 min-w-0">
+            <div class="flex items-center gap-2 text-primary-400 min-w-0">
               <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
@@ -535,7 +535,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
             </div>
             <button
               @click="syncStore.removePlaylist(playlist.id)"
-              class="px-2 py-1 font-mono text-[9.5px] tracking-[0.1em] uppercase bg-amber-500/20 text-amber-200 hover:bg-amber-500/30 transition-colors flex-shrink-0"
+              class="px-2 py-1 font-mono text-[9.5px] tracking-[0.1em] uppercase bg-primary-500/10 text-primary-400 hover:bg-primary-500/10 transition-colors flex-shrink-0"
             >
               {{ t('sync.remove') }}
             </button>
@@ -545,7 +545,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
           <div v-if="playlist.failedTracks.length > 0" class="mt-2">
             <button
               @click="toggleErrors(playlist.id)"
-              class="text-xs text-red-400 hover:text-red-300 flex items-center gap-1"
+              class="text-xs text-primary-400 hover:text-primary-400 flex items-center gap-1"
             >
               <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -557,7 +557,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
             </button>
             <div v-if="expandedErrors.has(playlist.id)" class="mt-2 space-y-1">
               <div v-for="track in playlist.failedTracks" :key="track.sourceTrackId" class="text-xs text-foreground-muted bg-background-main border border-line px-2 py-1">
-                {{ track.artist }} - {{ track.title }}: <span class="text-red-400">{{ track.error }}</span>
+                {{ track.artist }} - {{ track.title }}: <span class="text-primary-400">{{ track.error }}</span>
               </div>
             </div>
           </div>
@@ -568,7 +568,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
           <button
             v-if="syncStore.isSyncing(playlist.id)"
             @click="syncStore.cancelSync(playlist.id)"
-            class="p-2 text-foreground-muted hover:text-red-400 transition-colors"
+            class="p-2 text-foreground-muted hover:text-primary-400 transition-colors"
             v-tooltip="t('common.cancel')"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -598,7 +598,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
           <button
             @click="syncStore.updatePlaylist(playlist.id, { enabled: !playlist.enabled })"
             class="p-2 transition-colors"
-            :class="playlist.enabled ? 'text-green-400 hover:text-green-300' : 'text-foreground-muted hover:text-foreground'"
+            :class="playlist.enabled ? 'text-foreground hover:text-foreground' : 'text-foreground-muted hover:text-foreground'"
             v-tooltip="playlist.enabled ? t('sync.disable') : t('sync.enable')"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -609,7 +609,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
           </button>
           <button
             @click="syncStore.removePlaylist(playlist.id)"
-            class="p-2 text-foreground-muted hover:text-red-400 transition-colors"
+            class="p-2 text-foreground-muted hover:text-primary-400 transition-colors"
             v-tooltip="t('sync.remove')"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -631,7 +631,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
         <h2 class="font-display text-[15px] uppercase tracking-[0.06em]">{{ t('sync.syncedArtistsTitle') }}</h2>
         <button
           @click="artistSyncStore.syncAll()"
-          class="flex items-center gap-2 px-3 py-1.5 font-mono text-[10px] tracking-[0.12em] uppercase border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors"
+          class="flex items-center gap-2 px-3 py-1.5 font-mono text-[10px] tracking-[0.12em] uppercase border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
         >
           <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -656,7 +656,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
         </select>
         <button
           @click="artistSortDir = artistSortDir === 'asc' ? 'desc' : 'asc'"
-          class="p-2 bg-background-main border border-line text-foreground-muted hover:text-primary-500 hover:border-primary-500/50 transition-colors"
+          class="p-2 bg-background-main border border-line text-foreground-muted hover:text-primary-400 hover:border-primary-500/50 transition-colors"
           v-tooltip="t('sync.sortBy')"
         >
           <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': artistSortDir === 'desc' }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -673,8 +673,8 @@ function getScheduleLabel(schedule: SyncSchedule): string {
       <div v-for="artist in visibleArtists" :key="artist.id" class="card">
         <div class="flex items-start gap-4">
           <!-- Source icon: artist (mic) -->
-          <div class="w-10 h-10 bg-pink-500/10 flex items-center justify-center flex-shrink-0 border border-line">
-            <svg class="w-5 h-5 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="w-10 h-10 bg-hover flex items-center justify-center flex-shrink-0 border border-line">
+            <svg class="w-5 h-5 text-foreground-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
             </svg>
           </div>
@@ -687,9 +687,9 @@ function getScheduleLabel(schedule: SyncSchedule): string {
                 v-if="artist.lastSyncStatus"
                 class="px-1.5 py-0.5 font-mono text-[10px] tracking-[0.08em] uppercase border"
                 :class="{
-                  'bg-green-500/10 text-green-400 border-green-500/30': artist.lastSyncStatus === 'success',
-                  'bg-yellow-500/10 text-yellow-400 border-yellow-500/30': artist.lastSyncStatus === 'partial',
-                  'bg-red-500/10 text-red-400 border-red-500/30': artist.lastSyncStatus === 'error'
+                  'bg-hover text-foreground border-line-strong': artist.lastSyncStatus === 'success',
+                  'bg-primary-500/10 text-primary-400 border-primary-500/40': artist.lastSyncStatus === 'partial',
+                  'bg-primary-500/10 text-primary-400 border-primary-500/30': artist.lastSyncStatus === 'error'
                 }"
               >
                 {{ artist.lastSyncStatus }}
@@ -730,9 +730,9 @@ function getScheduleLabel(schedule: SyncSchedule): string {
             <!-- Stale: artist no longer in user's Deezer favorites -->
             <div
               v-if="artistSyncStore.isStale(artist)"
-              class="mt-2 flex items-center justify-between gap-2 bg-amber-500/10 border border-amber-500/30 px-3 py-2 text-xs"
+              class="mt-2 flex items-center justify-between gap-2 bg-primary-500/10 border border-primary-500/40 px-3 py-2 text-xs"
             >
-              <div class="flex items-center gap-2 text-amber-300 min-w-0">
+              <div class="flex items-center gap-2 text-primary-400 min-w-0">
                 <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
@@ -740,7 +740,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
               </div>
               <button
                 @click="artistSyncStore.removeArtist(artist.id)"
-                class="px-2 py-1 font-mono text-[9.5px] tracking-[0.1em] uppercase bg-amber-500/20 text-amber-200 hover:bg-amber-500/30 transition-colors flex-shrink-0"
+                class="px-2 py-1 font-mono text-[9.5px] tracking-[0.1em] uppercase bg-primary-500/10 text-primary-400 hover:bg-primary-500/10 transition-colors flex-shrink-0"
               >
                 {{ t('sync.remove') }}
               </button>
@@ -750,7 +750,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
             <div v-if="artist.failedAlbums.length > 0" class="mt-2">
               <button
                 @click="toggleArtistErrors(artist.id)"
-                class="text-xs text-red-400 hover:text-red-300 flex items-center gap-1"
+                class="text-xs text-primary-400 hover:text-primary-400 flex items-center gap-1"
               >
                 <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -762,7 +762,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
               </button>
               <div v-if="expandedArtistErrors.has(artist.id)" class="mt-2 space-y-1">
                 <div v-for="album in artist.failedAlbums" :key="album.sourceAlbumId" class="text-xs text-foreground-muted bg-background-main border border-line px-2 py-1">
-                  {{ album.title }} <span v-if="album.releaseDate">({{ album.releaseDate }})</span>: <span class="text-red-400">{{ album.error }}</span>
+                  {{ album.title }} <span v-if="album.releaseDate">({{ album.releaseDate }})</span>: <span class="text-primary-400">{{ album.error }}</span>
                 </div>
               </div>
             </div>
@@ -773,7 +773,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
             <button
               v-if="artistSyncStore.isSyncing(artist.id)"
               @click="artistSyncStore.cancelSync(artist.id)"
-              class="p-2 text-foreground-muted hover:text-red-400 transition-colors"
+              class="p-2 text-foreground-muted hover:text-primary-400 transition-colors"
               v-tooltip="t('common.cancel')"
             >
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -803,7 +803,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
             <button
               @click="artistSyncStore.updateArtist(artist.id, { enabled: !artist.enabled })"
               class="p-2 transition-colors"
-              :class="artist.enabled ? 'text-green-400 hover:text-green-300' : 'text-foreground-muted hover:text-foreground'"
+              :class="artist.enabled ? 'text-foreground hover:text-foreground' : 'text-foreground-muted hover:text-foreground'"
               v-tooltip="artist.enabled ? t('sync.disable') : t('sync.enable')"
             >
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -814,7 +814,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
             </button>
             <button
               @click="artistSyncStore.removeArtist(artist.id)"
-              class="p-2 text-foreground-muted hover:text-red-400 transition-colors"
+              class="p-2 text-foreground-muted hover:text-primary-400 transition-colors"
               v-tooltip="t('sync.remove')"
             >
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -843,14 +843,14 @@ function getScheduleLabel(schedule: SyncSchedule): string {
                   class="w-full px-3 py-2 bg-background-main font-mono text-[13px] border border-line focus:border-primary-500/50 outline-none"
                   :placeholder="t('sync.urlPlaceholder')"
                 />
-                <div v-if="resolving" class="mt-1 text-xs text-yellow-400 flex items-center gap-1">
+                <div v-if="resolving" class="mt-1 text-xs text-primary-400 flex items-center gap-1">
                   <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
                   {{ t('sync.resolvingShareLink') }}
                 </div>
-                <div v-else-if="detectedSource" class="mt-1 text-xs text-green-400 flex items-center gap-1">
+                <div v-else-if="detectedSource" class="mt-1 text-xs text-foreground flex items-center gap-1">
                   <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                   {{ t('sync.playlistDetected', { service: detectedSource === 'spotify' ? 'Spotify' : 'Deezer' }) }}
                 </div>
@@ -916,7 +916,7 @@ function getScheduleLabel(schedule: SyncSchedule): string {
                   class="w-full px-3 py-2 bg-background-main text-sm border border-line focus:border-primary-500/50 outline-none"
                   :placeholder="t('sync.namePlaceholder')"
                 />
-                <p v-if="!isEditNameValid" class="mt-1 text-xs text-red-400">{{ t('sync.editNameRequired') }}</p>
+                <p v-if="!isEditNameValid" class="mt-1 text-xs text-primary-400">{{ t('sync.editNameRequired') }}</p>
               </div>
 
               <div>

@@ -1,3 +1,4 @@
+import { useAccountStore, type ModuleId } from './stores/accountStore'
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 const router = createRouter({
@@ -36,11 +37,13 @@ const router = createRouter({
     {
       path: '/convert',
       name: 'convert',
+      meta: { module: 'converter' },
       component: () => import('./views/ConverterView.vue')
     },
     {
       path: '/dj',
       name: 'dj',
+      meta: { module: 'dj' },
       component: () => import('./views/DjView.vue')
     },
     {
@@ -92,11 +95,13 @@ const router = createRouter({
     {
       path: '/qobuz',
       name: 'qobuz',
+      meta: { module: 'qobuz' },
       component: () => import('./views/QobuzView.vue')
     },
     {
       path: '/qobuz/feed',
       name: 'qobuz-feed',
+      meta: { module: 'qobuz' },
       component: () => import('./views/QobuzFeedView.vue')
     },
     {
@@ -105,11 +110,27 @@ const router = createRouter({
       component: () => import('./views/GenresView.vue')
     },
     {
+      path: '/locked',
+      name: 'locked',
+      component: () => import('./views/LockedView.vue')
+    },
+    {
       // Catch-all: redirect unknown routes to home
       path: '/:pathMatch(.*)*',
       redirect: '/'
     }
   ]
+})
+
+// Paid modules: send the user to the explanation page when the Garimpo
+// account does not include the module. Each opened module is logged.
+router.beforeEach(to => {
+  const mod = to.meta?.module as ModuleId | undefined
+  if (!mod) return true
+  const account = useAccountStore()
+  if (!account.has(mod)) return { path: '/locked', query: { module: mod } }
+  account.logModule(mod)
+  return true
 })
 
 export default router

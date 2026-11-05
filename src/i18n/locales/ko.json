@@ -699,7 +699,15 @@
       "accounts": "Accounts",
       "profiles": "Profiles and backup",
       "about": "About"
-    }
+    },
+    "needsPlan": "needs a paid Deezer plan",
+    "qualityCapped": "Your Deezer plan downloads up to {quality}. Downloads use this quality until you upgrade.",
+    "deezerConnectedAs": "Connected as {name}",
+    "deezerMaxQuality": "up to {quality}",
+    "deezerSwitch": "Switch account",
+    "deezerAdvancedArl": "Advanced: use another ARL",
+    "spotifyConnected": "Spotify connected (Client ID {id})",
+    "spotifyRedo": "Redo with the assistant"
   },
   "login": {
     "title": "Deezer 로그인",
@@ -980,7 +988,8 @@
     "noneQueued": "다운로드를 대기열에 추가할 수 없음, 로그인 상태를 확인하세요",
     "copyFailed": "복사 실패",
     "pasteFailed": "붙여넣기 실패, 클립보드 접근이 거부됨",
-    "copiedLabel": "{label} 복사됨"
+    "copiedLabel": "{label} 복사됨",
+    "connectDeezerFirst": "Connect your Deezer account to download."
   },
   "sync": {
     "sortBy": "정렬 기준",
@@ -1157,7 +1166,10 @@
     "qobuzLinkedTip": "Qobuz 연결됨",
     "qobuzOfflineTip": "Qobuz 연결 안 됨 — 설정에서 연결하세요",
     "region": "지역",
-    "quality": "음질"
+    "quality": "음질",
+    "qualityLoggedOut": "Deezer not connected. Connect to download.",
+    "qualityCapped": "You chose {chosen}, but your Deezer plan downloads up to {quality}.",
+    "qualityTip": "Downloads in {quality}"
   },
   "about": {
     "disclaimer": "이 앱은 Deezer, Qobuz 또는 Spotify와 제휴하거나 이들로부터 승인 또는 보증을 받지 않았습니다. 본인 계정으로 개인적으로 사용하도록 만들어졌습니다. 음악 다운로드에 관한 현지 법률에 따라 책임감 있게 사용하고, 각 스트리밍 플랫폼의 저작권과 서비스 약관을 존중해 주세요. Qobuz 다운로드에는 본인 명의의 활성 유료 Qobuz 구독이 필요합니다.",
@@ -1265,7 +1277,7 @@
     "checkFailed": "업데이트를 확인할 수 없습니다.",
     "statusAvailable": "버전 {version}을(를) 사용할 수 있습니다.",
     "skipped": "버전 {version}을(를) 건너뛰었습니다.",
-    "manualUnsigned": "이번 업데이트는 한 번만 직접 다운로드해야 합니다. 이후 업데이트는 자동으로 설치됩니다.",
+    "manualUnsigned": "On this Mac the new version is installed by hand: download it, open the file and drag Garimpo to Applications, replacing the old one.",
     "manualReadonly": "앱이 자체 폴더에 쓸 수 없으므로 릴리스 페이지에서 새 버전을 다운로드하세요.",
     "manualUnsupported": "이 설치본은 자동으로 업데이트되지 않습니다. 릴리스 페이지나 패키지 관리자에서 새 버전을 받으세요.",
     "manualFailed": "업데이트를 설치할 수 없습니다: {error}. 릴리스 페이지에서 다운로드할 수 있습니다.",
@@ -1498,5 +1510,68 @@
     "howOthers": "Engine DJ, djay Pro and others: import the .m3u8 files from the Garimpo/DJ/M3U folder in your Music folder.",
     "min": "min",
     "max": "max"
+  },
+  "account": {
+    "heroTitle": "Your music, organised.",
+    "heroBody": "Sign in with your Garimpo account to download, convert playlists and prepare your DJ sets.",
+    "privacy": "Your music and files stay on your computer.",
+    "label": "Garimpo account",
+    "title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "show": "Show",
+    "hide": "Hide",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "forgot": "Forgot password",
+    "noAccess": "No access yet? Ask the administrator.",
+    "resetLabel": "Password",
+    "resetTitle": "Reset password",
+    "resetBody": "We will send a link to create a new password.",
+    "sendReset": "Send link",
+    "resetSent": "If {email} has an account, a link to create a new password is on its way.",
+    "backToLogin": "Back to sign in",
+    "checkAgain": "Check again",
+    "signOut": "Sign out",
+    "locked": "Not included in your plan",
+    "lockedLabel": "Not in your plan",
+    "lockedBody": "This module is not part of your current plan ({plan}). Ask the administrator to enable it, then check again.",
+    "seeAccount": "See my account",
+    "cardLabel": "Garimpo account",
+    "devTitle": "Development mode",
+    "devBody": "Login is not configured in this build, so every module is unlocked.",
+    "plan": "Plan",
+    "until": "until {date}",
+    "offline": "offline",
+    "modules": {
+      "downloads": "Downloads",
+      "converter": "Converter",
+      "dj": "DJ studio",
+      "qobuz": "Qobuz"
+    },
+    "reason": {
+      "blocked": {
+        "label": "Access blocked",
+        "title": "Your access is blocked",
+        "body": "Talk to the administrator to unblock your account."
+      },
+      "pending": {
+        "label": "Waiting for approval",
+        "title": "Your account is waiting for approval",
+        "body": "As soon as the administrator approves it, Garimpo opens here. Use Check again."
+      },
+      "expired": {
+        "label": "Plan expired",
+        "title": "Your plan has expired",
+        "body": "Renew your plan to keep using Garimpo, then use Check again."
+      }
+    },
+    "errors": {
+      "E_CREDENTIALS": "Wrong email or password.",
+      "E_NETWORK": "No connection to the Garimpo server. Check your internet.",
+      "E_RATE": "Too many attempts. Wait a minute and try again.",
+      "E_CONFIG": "Login is not configured in this build.",
+      "E_UNKNOWN": "Could not sign in. Try again."
+    }
   }
 }

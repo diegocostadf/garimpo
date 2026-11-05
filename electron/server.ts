@@ -20,6 +20,7 @@ import { fetchDeezerPublicJson, fetchDeezerPublicPaginated } from './services/de
 import { logSafe } from './services/logSafe'
 import { pipeRemoteAudio, serveLocalAudio } from './services/mediaProxy'
 import { djLibrary } from './services/djLibrary'
+import { accessControl } from './services/accessControl'
 import { readSource, startMatchJob, getMatchJob, cancelMatchJob } from './services/playlistImport'
 
 // File-based cache for discography (persists across app restarts)
@@ -701,6 +702,14 @@ export class AppServer extends EventEmitter {
     }
 
     const url = new URL(req.url || '/', `http://${this.host}:${this.port}`)
+    // Paid modules: refuse when the Garimpo account does not include them.
+    const gated: Array<[string, string]> = [['/api/dj/', 'dj'], ['/api/import/', 'converter']]
+    for (const [prefix, mod] of gated) {
+      if (url.pathname.startsWith(prefix) && !accessControl.hasModule(mod)) {
+        this.sendJSON(res, { error: 'E_MODULE_LOCKED', module: mod }, 403)
+        return
+      }
+    }
     if (url.pathname.startsWith('/api/dj/')) {
       await this.handleDj(url, req, res)
       return

@@ -28,14 +28,14 @@ watch(() => props.show, (newVal) => {
 }, { immediate: true })
 
 const iconColor = {
-  success: 'text-[#22c55e]',
-  error: 'text-[#ef4444]',
-  info: 'text-primary-500'
+  success: 'text-foreground',
+  error: 'text-primary-400',
+  info: 'text-primary-400'
 }
 
 const bgColor = {
-  success: 'bg-background-secondary border-l-2 border-l-[#22c55e]',
-  error: 'bg-background-secondary border-l-2 border-l-[#ef4444]',
+  success: 'bg-background-secondary border-l-2 border-l-foreground',
+  error: 'bg-background-secondary border-l-2 border-l-primary-500',
   info: 'bg-background-secondary border-l-2 border-l-primary-500'
 }
 </script>

@@ -294,7 +294,7 @@ const contextMenuItems = computed(() => {
                   d="M5 13l4 4L19 7" />
               </svg>
               <!-- Already downloaded indicator -->
-              <svg v-else-if="albumDownloadState === 'completed'" class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg v-else-if="albumDownloadState === 'completed'" class="w-5 h-5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -335,7 +335,7 @@ const contextMenuItems = computed(() => {
             >
               <svg
                 class="w-5 h-5"
-                :class="isFavorite() ? 'fill-primary-500 text-primary-500' : ''"
+                :class="isFavorite() ? 'fill-primary-500 text-primary-400' : ''"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

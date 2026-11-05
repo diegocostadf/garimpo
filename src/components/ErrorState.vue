@@ -25,12 +25,12 @@ const { t } = useI18n()
   >
     <!-- Error Icon -->
     <div
-      class="rounded-full bg-red-500/20 flex items-center justify-center mb-4"
+      class="rounded-full bg-primary-500/20 flex items-center justify-center mb-4"
       :class="compact ? 'w-12 h-12' : 'w-16 h-16'"
     >
       <svg
         :class="compact ? 'w-6 h-6' : 'w-8 h-8'"
-        class="text-red-400"
+        class="text-primary-400"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"

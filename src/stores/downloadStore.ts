@@ -1,3 +1,5 @@
+import { useWizardStore } from './wizardStore'
+import { effectiveQuality } from '../composables/useQuality'
 import { defineStore } from 'pinia'
 import { publicLinkForItem } from '../utils/sourceLinks'
 import i18n from '../i18n'
@@ -467,7 +469,8 @@ export const useDownloadStore = defineStore('downloads', () => {
       console.log(`[DownloadStore] Syncing settings to server - quality: ${settingsStore.settings.quality}, downloadPath: ${settingsStore.settings.downloadPath}`)
 
       const settingsToSync: Record<string, any> = {
-        quality: qualityMap[settingsStore.settings.quality] || 'MP3_320',
+        // Capped by what the Deezer account may download (free: MP3 128).
+        quality: qualityMap[effectiveQuality(settingsStore.settings.quality, useAuthStore().isLoggedIn ? useAuthStore().maxQuality : null)] || 'MP3_320',
         maxConcurrentDownloads: settingsStore.settings.maxConcurrentDownloads,
         downloadPacing: settingsStore.settings.downloadPacing,
         overwriteFiles: settingsStore.settings.overwriteFiles,
@@ -559,7 +562,18 @@ export const useDownloadStore = defineStore('downloads', () => {
     return undefined
   }
 
+
+  // Deezer downloads need a connected account: open the login assistant
+  // instead of queuing work the server would refuse.
+  function requireDeezer(): boolean {
+    if (useAuthStore().isLoggedIn) return true
+    useToastStore().info(i18n.global.t('notifications.connectDeezerFirst'))
+    useWizardStore().openDeezer()
+    return false
+  }
+
   async function addDownload(track: Track, { skipSync = false, playlistName = '' } = {}) {
+    if ((track as any).source !== 'qobuz' && !requireDeezer()) return
     const toastStore = useToastStore()
 
     // Check if already downloaded (completed). A completed row at a lower tier
@@ -656,6 +670,7 @@ export const useDownloadStore = defineStore('downloads', () => {
   }
 
   async function addAlbumDownload(album: Album, tracks: Track[], refreshTags = false) {
+    if (!requireDeezer()) return
     const toastStore = useToastStore()
 
     // Qobuz-sourced album/playlist → grouped Qobuz download path.
@@ -868,6 +883,7 @@ export const useDownloadStore = defineStore('downloads', () => {
   }
 
   async function addPlaylistDownload(playlist: Playlist, tracks: Track[], refreshTags = false) {
+    if (!requireDeezer()) return
     const toastStore = useToastStore()
 
     // Qobuz-sourced playlist → grouped Qobuz download path.
@@ -988,6 +1004,7 @@ export const useDownloadStore = defineStore('downloads', () => {
     totalTracks: number
     service?: 'deezer' | 'qobuz'
   }) {
+    if (!requireDeezer()) return
     await syncSettingsToServer()
     const settingsStore = useSettingsStore()
     const toastStore = useToastStore()

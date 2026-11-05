@@ -192,8 +192,8 @@ async function retryOne(f: ScannedFile) {
 function cancel() { cancelRequested.value = true }
 
 function resultClass(status?: string) {
-  if (status === 'updated' || status === 'preview') return 'text-green-400'
-  if (status === 'failed') return 'text-red-400'
+  if (status === 'updated' || status === 'preview') return 'text-foreground'
+  if (status === 'failed') return 'text-primary-400'
   if (status === 'skipped') return 'text-foreground-muted'
   return 'text-foreground-muted'
 }
@@ -269,7 +269,7 @@ function resultClass(status?: string) {
         <button v-if="isRunning" class="btn btn-ghost font-mono text-[10.5px] tracking-[0.1em] uppercase" @click="cancel">{{ t('retag.cancel') }}</button>
         <button
           v-if="!isRunning && failedFiles.length"
-          class="btn btn-ghost font-mono text-[10.5px] tracking-[0.1em] uppercase text-red-400"
+          class="btn btn-ghost font-mono text-[10.5px] tracking-[0.1em] uppercase text-primary-400"
           @click="retryFailed"
         >
           {{ t('retag.retryFailed', { count: failedFiles.length }) }}
@@ -289,9 +289,9 @@ function resultClass(status?: string) {
 
       <!-- Summary -->
       <div v-if="Object.keys(results).length" class="font-mono text-[11px] tracking-[0.04em]">
-        <span class="text-green-400">{{ summary.updated }} {{ dryRun ? t('retag.previewWouldChange') : t('retag.resultUpdated') }}</span>
+        <span class="text-foreground">{{ summary.updated }} {{ dryRun ? t('retag.previewWouldChange') : t('retag.resultUpdated') }}</span>
         · <span class="text-foreground-muted">{{ summary.skipped }} {{ t('retag.resultSkipped') }}</span>
-        · <span class="text-red-400">{{ summary.failed }} {{ t('retag.resultFailed') }}</span>
+        · <span class="text-primary-400">{{ summary.failed }} {{ t('retag.resultFailed') }}</span>
       </div>
 
       <!-- Per-file results -->
@@ -305,7 +305,7 @@ function resultClass(status?: string) {
           <span>· {{ t('retag.selectedCount', { count: selectedFiles.length }) }}</span>
           <button
             v-if="failedFiles.length && !isRunning"
-            class="text-red-400 hover:underline uppercase tracking-[0.08em]"
+            class="text-primary-400 hover:underline uppercase tracking-[0.08em]"
             @click="selectFailedOnly"
           >
             {{ t('retag.selectFailed', { count: failedFiles.length }) }}
@@ -335,23 +335,23 @@ function resultClass(status?: string) {
               >
                 <span class="text-foreground">{{ t('settings.tags.' + c.field) }}</span>:
                 <span class="line-through opacity-60">{{ c.from || '—' }}</span>
-                → <span class="text-green-400">{{ c.to }}</span>
+                → <span class="text-foreground">{{ c.to }}</span>
               </p>
             </div>
-            <p v-else-if="results[f.path]?.error" class="text-xs text-red-400 mt-1">
+            <p v-else-if="results[f.path]?.error" class="text-xs text-primary-400 mt-1">
               {{ results[f.path].error }}
             </p>
             <!-- Tags already matching Deezer — shown so they don't look skipped -->
             <p
               v-if="results[f.path]?.unchanged?.length"
-              class="text-xs text-green-400/70 mt-1"
+              class="text-xs text-foreground mt-1"
             >
               ✓ {{ t('retag.alreadyCorrect') }}: {{ (results[f.path]?.unchanged || []).map(k => t('settings.tags.' + k)).join(', ') }}
             </p>
             <!-- Fields Deezer has no value for — shown even alongside changes -->
             <p
               v-if="results[f.path]?.unavailable?.length"
-              class="text-xs text-amber-400/80 mt-1"
+              class="text-xs text-primary-400 mt-1"
             >
               {{ t('retag.notOnDeezer') }}: {{ (results[f.path]?.unavailable || []).map(k => t('settings.tags.' + k)).join(', ') }}
             </p>

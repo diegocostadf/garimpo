@@ -34,8 +34,10 @@ export interface UpdateStatus {
   busy?: boolean
 }
 
-// Point this at your own fork's GitHub repo so update checks find your releases.
-const REPO = 'diegocostadf/garimpo'
+// Releases repo (owner/name). Set GARIMPO_RELEASES_REPO at build time to
+// publish from a public "releases only" repo while the source stays private.
+declare const __GARIMPO_RELEASES_REPO__: string | undefined
+const REPO = (typeof __GARIMPO_RELEASES_REPO__ !== 'undefined' && /^[\w.-]+\/[\w.-]+$/.test(__GARIMPO_RELEASES_REPO__) ? __GARIMPO_RELEASES_REPO__ : '') || 'diegocostadf/garimpo'
 const RELEASE_URL = `https://github.com/${REPO}/releases/latest`
 const SCHEDULE_MS: Record<UpdateSchedule, number> = {
   hour: 60 * 60_000,
@@ -98,6 +100,7 @@ function updateInstallMode(): Promise<InstallMode> {
   return (modePromise ??= (async () => {
     const mode = installMode({
       platform: process.platform,
+      arch: process.arch,
       packaged: app.isPackaged,
       portableExe,
       developerIdSigned: process.platform === 'darwin' && app.isPackaged ? await macDeveloperIdSigned() : undefined,

@@ -36,6 +36,11 @@ Se o projeto estiver numa pasta sincronizada com o iCloud (como Documentos), use
 
 O app procura novas versões nas releases de `github.com/diegocostadf/garimpo`.
 
+## Contas, versões e instaladores
+
+Login e controle de acesso, publicação de versões, aviso de atualização, plataformas (Mac Intel e Apple Silicon, Windows 10/11 32 e 64 bits) e assinatura: veja [docs/ACESSO-E-PUBLICACAO.md](docs/ACESSO-E-PUBLICACAO.md).
+Relatório de testes: [docs/QA-0.3.0.md](docs/QA-0.3.0.md).
+
 ## Licença
 
 GPL-3.0. Veja `LICENSE` e `CREDITS.md`.

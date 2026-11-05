@@ -237,7 +237,7 @@ export const defaultSettings: Settings = {
     jpegImageQuality: 90
   },
   // Other settings
-  updateCheckEvery: 'hour',
+  updateCheckEvery: 'sixHours',
   savePlaylistAsCompilation: false,
   useNullSeparator: false,
   saveID3v1: false,

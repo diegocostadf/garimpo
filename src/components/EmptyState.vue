@@ -87,13 +87,13 @@ defineProps<{
     <!-- Error Empty State -->
     <svg v-else-if="type === 'error'" class="w-32 h-32 mx-auto mb-6" viewBox="0 0 128 128" fill="none">
       <!-- Warning triangle -->
-      <path d="M64 28L108 100H20L64 28z" stroke="currentColor" class="text-red-400/50" stroke-width="3" fill="none"/>
+      <path d="M64 28L108 100H20L64 28z" stroke="currentColor" class="text-primary-400/50" stroke-width="3" fill="none"/>
       <!-- Exclamation mark -->
-      <path d="M64 52v20" stroke="currentColor" class="text-red-400" stroke-width="4" stroke-linecap="round"/>
-      <circle cx="64" cy="84" r="3" class="fill-red-400"/>
+      <path d="M64 52v20" stroke="currentColor" class="text-primary-400" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="64" cy="84" r="3" class="fill-primary-500"/>
       <!-- Lightning bolts -->
-      <path d="M28 48l-4 8h6l-4 8" stroke="currentColor" class="text-red-300/40" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M100 56l-3 6h5l-3 6" stroke="currentColor" class="text-red-300/40" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M28 48l-4 8h6l-4 8" stroke="currentColor" class="text-primary-400/40" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M100 56l-3 6h5l-3 6" stroke="currentColor" class="text-primary-400/40" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
 
     <!-- Title and subtitle -->

@@ -82,7 +82,7 @@ watch(() => route.params.id, (id) => { if (id) loadUser(id as string) })
           class="w-16 h-16 object-cover border border-line"
         />
         <div>
-          <p class="font-mono text-[10px] tracking-[0.3em] uppercase text-primary-500 mb-1.5">
+          <p class="font-mono text-[10px] tracking-[0.3em] uppercase text-primary-400 mb-1.5">
             {{ t('userPlaylists.creator') }}
           </p>
           <h1 class="font-display uppercase text-[30px] leading-[1.02] tracking-[-0.01em]">{{ userName }}</h1>

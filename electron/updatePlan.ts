@@ -3,7 +3,12 @@
  */
 
 /** Apple Team ID the Developer ID builds are signed with. */
-export const TEAM_ID = 'W966GFT83K'
+// Apple Developer Team ID of the Garimpo signing certificate, set at build
+// time (GARIMPO_APPLE_TEAM_ID). Empty means no Developer ID build exists yet, so
+// Macs always update by downloading the new version.
+declare const __GARIMPO_APPLE_TEAM_ID__: string | undefined
+declare const __GARIMPO_RELEASES_REPO__: string | undefined
+export const TEAM_ID = typeof __GARIMPO_APPLE_TEAM_ID__ !== 'undefined' ? __GARIMPO_APPLE_TEAM_ID__ : ''
 
 /**
  * How an update gets onto this machine.
@@ -27,6 +32,8 @@ export interface InstallEnv {
   developerIdSigned?: boolean
   /** Windows portable: can the app write next to its exe? */
   portableDirWritable?: boolean
+  /** CPU architecture of the running app (process.arch). */
+  arch?: string
   /** Linux: the AppImage being run (APPIMAGE), else undefined for .deb, AUR and source installs. */
   appImage?: string
 }
@@ -34,6 +41,8 @@ export interface InstallEnv {
 export function installMode(env: InstallEnv): InstallMode {
   if (!env.packaged) return { kind: 'manual', reason: 'dev' }
   if (env.platform === 'win32') {
+    // The feed carries the 64-bit installer; 32-bit Windows downloads its own.
+    if (env.arch === 'ia32') return { kind: 'manual', reason: 'unsupported' }
     if (!env.portableExe) return { kind: 'installer' }
     return env.portableDirWritable ? { kind: 'portable' } : { kind: 'manual', reason: 'readonly' }
   }
@@ -51,7 +60,7 @@ export function installMode(env: InstallEnv): InstallMode {
  * Application signature from our team, never for ad-hoc or another team's certificate.
  */
 export function isDeveloperIdSigned(codesignDisplay: string, teamId = TEAM_ID): boolean {
-  if (/^Signature=adhoc$/m.test(codesignDisplay)) return false
+  if (!teamId || /^Signature=adhoc$/m.test(codesignDisplay)) return false
   const team = codesignDisplay.match(/^TeamIdentifier=(\S+)$/m)?.[1]
   const leaf = codesignDisplay.match(/^Authority=(.+)$/m)?.[1] ?? ''
   return team === teamId && leaf.startsWith('Developer ID Application:') && leaf.endsWith(`(${teamId})`)
@@ -74,7 +83,7 @@ export interface ReleaseAsset {
 }
 
 /** Releases are published from github.com/diegocostadf/garimpo only; anything else is refused before download. */
-export const RELEASE_DOWNLOAD_PREFIX = 'https://github.com/diegocostadf/garimpo/releases/download/'
+export const RELEASE_DOWNLOAD_PREFIX = `https://github.com/${(typeof __GARIMPO_RELEASES_REPO__ !== 'undefined' && __GARIMPO_RELEASES_REPO__) || 'diegocostadf/garimpo'}/releases/download/`
 
 /** The portable exe for this architecture in a release (GitHub turns the space in its name into a dot). */
 export function portableAsset(assets: ReleaseAsset[], arch: string): ReleaseAsset | null {

@@ -11,6 +11,14 @@ export default defineConfig({
       {
         entry: 'electron/main.ts',
         vite: {
+          define: {
+            // Public Supabase project settings for Garimpo accounts. Empty
+            // values run the app in development mode (no login).
+            __GARIMPO_SUPABASE_URL__: JSON.stringify(process.env.GARIMPO_SUPABASE_URL || ''),
+            __GARIMPO_SUPABASE_ANON_KEY__: JSON.stringify(process.env.GARIMPO_SUPABASE_ANON_KEY || ''),
+            __GARIMPO_RELEASES_REPO__: JSON.stringify(process.env.GARIMPO_RELEASES_REPO || 'diegocostadf/garimpo'),
+            __GARIMPO_APPLE_TEAM_ID__: JSON.stringify(process.env.GARIMPO_APPLE_TEAM_ID || '')
+          },
           build: {
             outDir: 'dist-electron',
             rollupOptions: {

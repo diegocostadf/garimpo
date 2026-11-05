@@ -19,12 +19,10 @@ const dir = 'release'
 const name = `Garimpo`
 
 const feeds: Record<string, string[]> = {
-  // The updater picks by architecture: arm64 Macs take the arm64 zip, Intel Macs the universal one.
-  'latest-mac.yml': [`${name}-${version}-universal-mac.zip`, `${name}-${version}-arm64-mac.zip`],
-  // Windows arm64 and x64 pick their installer by the architecture in its name.
-  'latest.yml': [`${name}-Setup-${version}-x64.exe`, `${name}-Setup-${version}-arm64.exe`],
-  'latest-linux.yml': [`${name}-${version}.AppImage`],
-  'latest-linux-arm64.yml': [`${name}-${version}-arm64.AppImage`]
+  // Apple Silicon picks the arm64 zip by name, Intel Macs the x64 one.
+  'latest-mac.yml': [`${name}-${version}-x64-mac.zip`, `${name}-${version}-arm64-mac.zip`],
+  // Only the 64-bit Windows installer updates in place; 32-bit Windows is sent to the download page.
+  'latest.yml': [`${name}-Setup-${version}-x64.exe`]
 }
 
 const releaseDate = new Date().toISOString()
