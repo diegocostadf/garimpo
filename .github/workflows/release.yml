@@ -134,7 +134,7 @@ jobs:
           path: release
           merge-multiple: true
       - name: Update feeds
-        run: bun scripts/write-update-feeds.ts
+        run: node scripts/write-update-feeds.mjs
       - name: Release notes
         run: |
           VERSION=$(node -p "require('./package.json').version")

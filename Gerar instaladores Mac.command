@@ -45,6 +45,8 @@ done
 DEST="$(pwd)/release"
 mkdir -p "$DEST"
 cp "$OUT"/*.dmg "$OUT"/*.zip "$DEST"/ 2>/dev/null || true
+# Arquivos de atualização (latest-mac.yml e, se os .exe estiverem aqui, latest.yml)
+node scripts/write-update-feeds.mjs || true
 echo ""
 echo "Pronto! Instaladores em: $DEST"
 open "$DEST"

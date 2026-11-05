@@ -1,24 +1,24 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 /**
  * Write the update feeds the in-app updater reads, from the installers in release/. Run after all the platform
  * builds, before uploading.
  *
- *   bun scripts/write-update-feeds.ts
+ *   node scripts/write-update-feeds.mjs
  *
  * electron-builder's own feeds cannot be uploaded: each `electron-builder` run overwrites latest-mac.yml and
  * latest.yml, so the second architecture wipes the first, and they name files with a dash where GitHub's upload
  * turns the space in our file names into a dot, so the updater would 404. Hashing the finished files here also
- * means the feed describes exactly what gets uploaded. Stops if any expected file is missing.
+ * means the feed describes exactly what gets uploaded. A feed whose files are not all present is skipped (build Mac and Windows, then run again).
  */
 import { createHash } from 'node:crypto'
 import { readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const version: string = JSON.parse(readFileSync('package.json', 'utf8')).version
+const version = JSON.parse(readFileSync('package.json', 'utf8')).version
 const dir = 'release'
 const name = `Garimpo`
 
-const feeds: Record<string, string[]> = {
+const feeds = {
   // Apple Silicon picks the arm64 zip by name, Intel Macs the x64 one.
   'latest-mac.yml': [`${name}-${version}-x64-mac.zip`, `${name}-${version}-arm64-mac.zip`],
   // Only the 64-bit Windows installer updates in place; 32-bit Windows is sent to the download page.
@@ -27,6 +27,8 @@ const feeds: Record<string, string[]> = {
 
 const releaseDate = new Date().toISOString()
 for (const [feed, files] of Object.entries(feeds)) {
+  const missing = files.filter((file) => { try { statSync(join(dir, file)); return false } catch { return true } })
+  if (missing.length) { console.log(`skipped ${feed}: missing ${missing.join(', ')}`); continue }
   const entries = files.map((file) => {
     const path = join(dir, file)
     const sha512 = createHash('sha512').update(readFileSync(path)).digest('base64')
