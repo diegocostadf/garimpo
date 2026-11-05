@@ -55,9 +55,9 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Geist Sans', 'system-ui', 'sans-serif'],
-        mono: ['Geist Mono', 'ui-monospace', 'monospace'],
-        display: ['Geist Sans', 'system-ui', 'sans-serif'],
+        sans: ['IBM Plex Sans', 'system-ui', 'sans-serif'],
+        mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
+        display: ['Doto', 'IBM Plex Mono', 'monospace'],
       },
       borderRadius: {
         card: '16px',

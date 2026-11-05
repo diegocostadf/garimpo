@@ -6,16 +6,20 @@ import { useProfileStore } from '../stores/profileStore'
 import { useToastStore } from '../stores/toastStore'
 import { useUpdateStore } from '../stores/updateStore'
 import { useAuthStore } from '../stores/authStore'
+import { useWizardStore } from '../stores/wizardStore'
 import { SUPPORTED_LOCALES, setLocale, getCurrentLocale } from '../i18n'
 import FlagIcon from '../components/FlagIcon.vue'
 import ProfileSelector from '../components/ProfileSelector.vue'
 import BackupRestore from '../components/BackupRestore.vue'
+import AboutView from './AboutView.vue'
+import { useRoute } from 'vue-router'
 import { useContextMenu } from '../composables/useContextMenu'
 
 const { t } = useI18n()
 const settingsStore = useSettingsStore()
 const updateStore = useUpdateStore()
 const authStore = useAuthStore()
+const wizardStore = useWizardStore()
 const profileStore = useProfileStore()
 
 // Settings search
@@ -56,7 +60,7 @@ const filteredSections = computed(() => {
 })
 
 function isSectionVisible(section: string): boolean {
-  if (!filteredSections.value) return true
+  if (!filteredSections.value) return sectionTabs[activeTab.value].includes(section)
   return filteredSections.value.includes(section)
 }
 
@@ -149,61 +153,36 @@ const spotifyClientSecret = ref('')
 const spotifyUsername = ref('')
 
 // Collapsible section states (true = expanded, false = collapsed)
-const SECTION_STATE_KEY = 'settingsExpandedSections'
+// Every section is always open: settings are split into tabs instead of
+// collapsible panels, so nothing is hidden behind an extra click.
+const expandedSections = ref({
+  profiles: true, appearance: true, languages: true, downloads: true, folders: true,
+  templates: true, metadata: true, albumCovers: true, tags: true, other: true,
+  accounts: true, spotify: true, qobuz: true, backup: true
+})
 
-const defaultExpandedSections = {
-  profiles: true,
-  appearance: true,
-  languages: true,
-  downloads: true,
-  folders: false,
-  templates: false,
-  metadata: false,
-  albumCovers: false,
-  tags: false,
-  other: false,
-  accounts: true,
-  spotify: true,
-  qobuz: true,
-  // Closed by default so it doesn't dominate the settings page; users open it
-  // intentionally when they need to back up or restore (#72).
-  backup: false
+type SettingsTab = 'accounts' | 'downloads' | 'files' | 'tags' | 'look' | 'profiles' | 'about'
+const sectionTabs: Record<SettingsTab, string[]> = {
+  accounts: ['accounts', 'qobuz', 'spotify'],
+  downloads: ['downloads', 'other'],
+  files: ['folders', 'templates', 'albumCovers'],
+  tags: ['metadata', 'tags'],
+  look: ['appearance', 'languages'],
+  profiles: ['profiles', 'backup'],
+  about: []
 }
-
-// Restore the collapse state from the last session. Merged over the defaults so
-// a section added in a later version still gets its intended default instead of
-// coming back undefined from an older saved object. Reported by cisko99za, who
-// rotates his Deezer ARL often and had to re-collapse the same panels every
-// launch to reach the accounts section.
-function loadExpandedSections(): typeof defaultExpandedSections {
-  try {
-    const saved = localStorage.getItem(SECTION_STATE_KEY)
-    if (!saved) return { ...defaultExpandedSections }
-    const parsed = JSON.parse(saved)
-    if (!parsed || typeof parsed !== 'object') return { ...defaultExpandedSections }
-    const merged = { ...defaultExpandedSections }
-    for (const key of Object.keys(defaultExpandedSections) as Array<keyof typeof defaultExpandedSections>) {
-      if (typeof parsed[key] === 'boolean') merged[key] = parsed[key]
-    }
-    return merged
-  } catch {
-    return { ...defaultExpandedSections }
-  }
-}
-
-const expandedSections = ref(loadExpandedSections())
-
-watch(expandedSections, (state) => {
-  try {
-    localStorage.setItem(SECTION_STATE_KEY, JSON.stringify(state))
-  } catch (e) {
-    console.error('[SettingsView] Could not persist section collapse state:', e)
-  }
-}, { deep: true })
-
-function toggleSection(section: keyof typeof expandedSections.value) {
-  expandedSections.value[section] = !expandedSections.value[section]
-}
+const route = useRoute()
+const requestedTab = route.query.tab as SettingsTab | undefined
+const activeTab = ref<SettingsTab>(requestedTab && requestedTab in sectionTabs ? requestedTab : (authStore.isLoggedIn ? 'downloads' : 'accounts'))
+const settingsTabs = computed(() => [
+  { id: 'accounts' as SettingsTab, label: t('settings.tabs.accounts') },
+  { id: 'downloads' as SettingsTab, label: t('downloads.title') },
+  { id: 'files' as SettingsTab, label: t('settings.folders') },
+  { id: 'tags' as SettingsTab, label: t('settings.metadata') },
+  { id: 'look' as SettingsTab, label: t('settings.appearance') },
+  { id: 'profiles' as SettingsTab, label: t('settings.tabs.profiles') },
+  { id: 'about' as SettingsTab, label: t('settings.tabs.about') }
+])
 
 onMounted(async () => {
   // Note: Settings are already loaded by App.vue - don't reload here
@@ -431,7 +410,7 @@ function openSpotifyInfo() {
 }
 
 const themeOptions: { value: ColorTheme; label: string; colors: string[] }[] = [
-  { value: 'garimpo', label: 'Garimpo', colors: ['#996300', '#E5B04A', '#F7F4EE'] }, // i18n-exempt
+  { value: 'garimpo', label: 'Garimpo', colors: ['#000000', '#D71921', '#F2F2F2'] }, // i18n-exempt
   { value: 'signal', label: 'Signal', colors: ['#C8F135', '#8FAE24', '#59C2D6'] },
   { value: 'violet', label: 'Violet', colors: ['#8B5CF6', '#6366F1', '#3B82F6'] },
   { value: 'spotify', label: 'Spotify', colors: ['#1DB954', '#1ED760', '#17A34A'] },
@@ -444,9 +423,9 @@ const themeOptions: { value: ColorTheme; label: string; colors: string[] }[] = [
 ]
 
 // Template section state
-const showTrackVars = ref(false)
-const showAlbumTrackVars = ref(false)
-const showPlaylistTrackVars = ref(false)
+const showTrackVars = ref(true)
+const showAlbumTrackVars = ref(true)
+const showPlaylistTrackVars = ref(true)
 
 // Available template variables
 const templateVariables = [
@@ -507,16 +486,16 @@ async function reindexLibrary() {
 </script>
 
 <template>
-  <div class="space-y-8 max-w-3xl">
-    <div class="flex items-center justify-between gap-4">
-      <h1 class="font-display uppercase text-[22px] tracking-[0.02em]">{{ t('settings.title') }}</h1>
+  <div class="space-y-6 max-w-3xl">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <h1 class="text-[32px] font-semibold tracking-tight">{{ t('settings.title') }}</h1>
       <!-- Settings Search -->
       <div class="relative w-64">
         <input
           v-model="settingsSearch"
           type="text"
           :placeholder="t('settings.searchSettings')"
-          class="w-full pl-10 pr-8 py-2 bg-background-main/60 font-mono text-sm border border-line focus:border-primary-500/50 outline-none"
+          class="w-full h-10 pl-10 pr-8 rounded-xl bg-surface text-sm border border-line focus:border-primary-500 outline-none"
         />
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -533,6 +512,22 @@ async function reindexLibrary() {
       </div>
     </div>
 
+    <!-- Section tabs: every setting is one click away, nothing collapses -->
+    <div v-if="!settingsSearch" role="tablist" :aria-label="t('settings.title')" class="flex flex-wrap gap-2">
+      <button
+        v-for="tab in settingsTabs"
+        :key="tab.id"
+        type="button"
+        role="tab"
+        :aria-selected="activeTab === tab.id"
+        @click="activeTab = tab.id"
+        class="h-10 px-4 rounded-full text-sm border transition-colors"
+        :class="activeTab === tab.id ? 'bg-foreground text-background-main border-foreground font-medium' : 'bg-surface text-foreground-muted border-line hover:text-foreground'"
+      >{{ tab.label }}</button>
+    </div>
+
+    <AboutView v-if="!settingsSearch && activeTab === 'about'" />
+
     <!-- No results message -->
     <div v-if="filteredSections && filteredSections.length === 0" class="card text-center py-8">
       <svg class="w-12 h-12 mx-auto text-foreground-muted mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -547,21 +542,13 @@ async function reindexLibrary() {
     <!-- Settings Profiles -->
     <section v-if="isSectionVisible('profiles')" class="card">
       <h2
-        @click="toggleSection('profiles')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
         {{ t('settings.profiles.title') }}
-        <svg
-          class="w-4 h-4 ml-auto transition-transform duration-200"
-          :class="{ 'rotate-180': expandedSections.profiles }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.profiles" class="space-y-6 pt-6">
@@ -572,21 +559,13 @@ async function reindexLibrary() {
     <!-- Appearance Settings -->
     <section v-if="isSectionVisible('appearance')" class="card">
       <h2
-        @click="toggleSection('appearance')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
         {{ t('settings.appearance') }}
-        <svg
-          class="w-4 h-4 ml-auto transition-transform duration-200"
-          :class="{ 'rotate-180': expandedSections.appearance }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.appearance" class="space-y-6 pt-6">
@@ -724,21 +703,13 @@ async function reindexLibrary() {
     <!-- Languages Section -->
     <section v-if="isSectionVisible('languages')" class="card">
       <h2
-        @click="toggleSection('languages')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         {{ t('settings.languages') }}
-        <svg
-          class="w-4 h-4 ml-auto transition-transform duration-200"
-          :class="{ 'rotate-180': expandedSections.languages }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.languages" class="pt-6">
@@ -762,21 +733,13 @@ async function reindexLibrary() {
     <!-- Downloads Settings -->
     <section v-if="isSectionVisible('downloads')" class="card">
       <h2
-        @click="toggleSection('downloads')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>
         {{ t('downloads.title') }}
-        <svg
-          class="w-4 h-4 ml-auto transition-transform duration-200"
-          :class="{ 'rotate-180': expandedSections.downloads }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.downloads" class="space-y-6 pt-6">
@@ -987,21 +950,13 @@ async function reindexLibrary() {
     <!-- Folders Settings -->
     <section v-if="isSectionVisible('folders')" class="card">
       <h2
-        @click="toggleSection('folders')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
         </svg>
         {{ t('settings.folders') }}
-        <svg
-          class="w-4 h-4 ml-auto transition-transform duration-200"
-          :class="{ 'rotate-180': expandedSections.folders }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.folders" class="space-y-6 pt-6">
@@ -1138,21 +1093,13 @@ async function reindexLibrary() {
     <!-- Templates Settings -->
     <section v-if="isSectionVisible('templates')" class="card">
       <h2
-        @click="toggleSection('templates')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4 6h16M4 12h16M4 18h7" />
         </svg>
         {{ t('settings.templates') }}
-        <svg
-          class="w-4 h-4 ml-auto transition-transform duration-200"
-          :class="{ 'rotate-180': expandedSections.templates }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.templates" class="space-y-6 pt-6">
@@ -1167,21 +1114,9 @@ async function reindexLibrary() {
         />
 
         <!-- Collapsible variables -->
-        <button
-          @click="showTrackVars = !showTrackVars"
-          class="flex items-center gap-2 text-sm text-foreground-muted hover:text-foreground transition-colors"
-        >
-          <svg
-            class="w-4 h-4 transition-transform"
-            :class="{ 'rotate-90': showTrackVars }"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
+        <div class="flex items-center gap-2 text-sm text-foreground-muted">
           {{ t('settings.availableTracknameVars') }}
-        </button>
+        </div>
         <div v-if="showTrackVars" class="p-3 bg-background-main/60 border border-line">
           <div class="flex flex-wrap gap-2">
             <button
@@ -1207,21 +1142,9 @@ async function reindexLibrary() {
         />
 
         <!-- Collapsible variables -->
-        <button
-          @click="showAlbumTrackVars = !showAlbumTrackVars"
-          class="flex items-center gap-2 text-sm text-foreground-muted hover:text-foreground transition-colors"
-        >
-          <svg
-            class="w-4 h-4 transition-transform"
-            :class="{ 'rotate-90': showAlbumTrackVars }"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
+        <div class="flex items-center gap-2 text-sm text-foreground-muted">
           {{ t('settings.availableAlbumTrackVars') }}
-        </button>
+        </div>
         <div v-if="showAlbumTrackVars" class="p-3 bg-background-main/60 border border-line">
           <div class="flex flex-wrap gap-2">
             <button
@@ -1247,21 +1170,9 @@ async function reindexLibrary() {
         />
 
         <!-- Collapsible variables -->
-        <button
-          @click="showPlaylistTrackVars = !showPlaylistTrackVars"
-          class="flex items-center gap-2 text-sm text-foreground-muted hover:text-foreground transition-colors"
-        >
-          <svg
-            class="w-4 h-4 transition-transform"
-            :class="{ 'rotate-90': showPlaylistTrackVars }"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
+        <div class="flex items-center gap-2 text-sm text-foreground-muted">
           {{ t('settings.availablePlaylistTrackVars') }}
-        </button>
+        </div>
         <div v-if="showPlaylistTrackVars" class="p-3 bg-background-main/60 border border-line">
           <div class="flex flex-wrap gap-2">
             <button
@@ -1297,21 +1208,13 @@ async function reindexLibrary() {
     <!-- Metadata Settings -->
     <section v-if="isSectionVisible('metadata')" class="card">
       <h2
-        @click="toggleSection('metadata')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
         {{ t('settings.metadata') }}
-        <svg
-          class="w-4 h-4 ml-auto transition-transform duration-200"
-          :class="{ 'rotate-180': expandedSections.metadata }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.metadata" class="space-y-3 pt-6">
@@ -1378,21 +1281,13 @@ async function reindexLibrary() {
     <!-- Album Covers Settings -->
     <section v-if="isSectionVisible('albumCovers')" class="card">
       <h2
-        @click="toggleSection('albumCovers')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
         {{ t('settings.albumCovers') }}
-        <svg
-          class="w-4 h-4 ml-auto transition-transform duration-200"
-          :class="{ 'rotate-180': expandedSections.albumCovers }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.albumCovers" class="space-y-6 pt-6">
@@ -1505,21 +1400,13 @@ async function reindexLibrary() {
     <!-- Which tags to save -->
     <section v-if="isSectionVisible('tags')" class="card">
       <h2
-        @click="toggleSection('tags')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
         </svg>
         {{ t('settings.tagsToSave') }}
-        <svg
-          class="w-4 h-4 ml-auto transition-transform duration-200"
-          :class="{ 'rotate-180': expandedSections.tags }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.tags" class="pt-6">
@@ -1748,8 +1635,7 @@ async function reindexLibrary() {
     <!-- Other Settings -->
     <section v-if="isSectionVisible('other')" class="card">
       <h2
-        @click="toggleSection('other')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1757,13 +1643,6 @@ async function reindexLibrary() {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
         {{ t('settings.other') }}
-        <svg
-          class="w-4 h-4 ml-auto transition-transform duration-200"
-          :class="{ 'rotate-180': expandedSections.other }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.other" class="space-y-6 pt-6">
@@ -1971,24 +1850,20 @@ async function reindexLibrary() {
     <!-- Account Settings -->
     <section v-if="isSectionVisible('accounts')" class="card">
       <h2
-        @click="toggleSection('accounts')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
         {{ t('settings.deezerAccount') }}
-        <svg
-          class="w-4 h-4 ml-auto transition-transform duration-200"
-          :class="{ 'rotate-180': expandedSections.accounts }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.accounts" class="space-y-6 pt-6">
+        <button type="button" @click="wizardStore.openDeezer()" class="btn btn-primary w-full sm:w-auto flex items-center justify-center gap-2">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          {{ t('wizard.deezer.start') }}
+        </button>
         <div>
         <label class="block font-mono text-[9.5px] tracking-[0.2em] uppercase text-foreground-muted mb-2">{{ t('login.arlToken') }}</label>
         <div class="flex gap-2">
@@ -2051,20 +1926,12 @@ async function reindexLibrary() {
     <!-- Qobuz Integration (WIP — feature/qobuz-integration) -->
     <section v-if="isSectionVisible('qobuz')" class="card">
       <h2
-        @click="toggleSection('qobuz')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
         </svg>
         {{ t('settings.qobuz.title') }} <span class="font-mono text-[9px] px-1.5 py-0.5 border border-primary-500/40 text-primary-400 tracking-[0.12em]">HI-RES</span>
-        <svg
-          class="w-4 h-4 ml-auto transition-transform duration-200"
-          :class="{ 'rotate-180': expandedSections.qobuz }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.qobuz" class="space-y-5 pt-6">
@@ -2167,23 +2034,19 @@ async function reindexLibrary() {
     <!-- Spotify Integration -->
     <section v-if="isSectionVisible('spotify')" class="card">
       <h2
-        @click="toggleSection('spotify')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-[#1DB954]" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
         </svg>
         {{ t('settings.spotify.title') }}
-        <svg
-          class="w-4 h-4 ml-auto transition-transform duration-200"
-          :class="{ 'rotate-180': expandedSections.spotify }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.spotify" class="space-y-6 pt-6">
+        <button type="button" @click="wizardStore.openSpotify()" class="btn btn-primary w-full sm:w-auto flex items-center justify-center gap-2">
+          <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          {{ t('wizard.openAssistant') }}
+        </button>
         <p class="text-sm text-foreground-muted">
         {{ t('settings.spotify.description') }}
       </p>
@@ -2316,21 +2179,13 @@ async function reindexLibrary() {
          a reset. -->
     <section v-if="isSectionVisible('backup')" class="card">
       <h2
-        @click="toggleSection('backup')"
-        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2 cursor-pointer hover:text-primary-400 transition-colors select-none"
+        class="font-display text-[13px] uppercase tracking-[0.08em] border-b border-line pb-2 flex items-center gap-2"
       >
         <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
         </svg>
         {{ t('settings.backup.title') }}
-        <svg
-          class="w-4 h-4 ml-auto transition-transform"
-          :class="{ 'rotate-180': expandedSections.backup }"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
       </h2>
 
       <div v-show="expandedSections.backup" class="pt-6">

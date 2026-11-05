@@ -3,8 +3,11 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from './components/Sidebar.vue'
 import TitleBar from './components/TitleBar.vue'
-import DownloadBar from './components/DownloadBar.vue'
+import DownloadRack from './components/DownloadRack.vue'
 import BrandMark from './components/BrandMark.vue'
+import DeezerWizard from './components/DeezerWizard.vue'
+import SpotifyWizard from './components/SpotifyWizard.vue'
+import { useWizardStore } from './stores/wizardStore'
 import ToastContainer from './components/ToastContainer.vue'
 import UpdateDialog from './components/UpdateDialog.vue'
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal.vue'
@@ -28,6 +31,7 @@ const settingsStore = useSettingsStore()
 const profileStore = useProfileStore()
 const syncStore = useSyncStore()
 const favoritesStore = useFavoritesStore()
+const wizardStore = useWizardStore()
 const isLoading = ref(true)
 const loadingMessage = ref(t('app.loadingSettings'))
 const showAuthExpiredBanner = ref(false)
@@ -67,7 +71,7 @@ function dismissAuthExpiredBanner() {
 function goToLogin() {
   showAuthExpiredBanner.value = false
   authStore.clearAuthExpired()
-  router.push('/settings')
+  wizardStore.openDeezer()
 }
 
 // Register global keyboard shortcuts
@@ -198,6 +202,8 @@ onBeforeUnmount(() => {
     <!-- Toast Notifications -->
     <ToastContainer />
     <UpdateDialog />
+    <DeezerWizard :show="wizardStore.deezerOpen" @close="wizardStore.deezerOpen = false" />
+    <SpotifyWizard :show="wizardStore.spotifyOpen" @close="wizardStore.spotifyOpen = false" />
 
     <!-- Offline Status Banner -->
     <OfflineBanner />
@@ -266,12 +272,10 @@ onBeforeUnmount(() => {
           </router-view>
         </div>
 
-        <!-- Download Progress Bar (bottom bar for active download feedback) -->
-        <DownloadBar v-if="downloadStore.activeDownloads.length > 0" />
       </main>
 
-      <!-- The old right-hand Transfer Rack is gone: the queue lives on the
-           Downloads page and the sidebar badge shows how many are running. -->
+      <!-- Download desk: channels with faders, always beside the content -->
+      <DownloadRack />
     </div>
 
   </div>

@@ -716,12 +716,9 @@ const contextMenuItems = computed(() => {
                    cyan = Channel Q / Qobuz). -->
               <button
                 @click.prevent="downloadAlbum(album)"
-                class="px-2.5 py-1 font-mono text-[10px] font-bold tracking-[0.12em] border transition-colors whitespace-nowrap"
-                :class="(album as any).source === 'qobuz'
-                  ? 'border-qobuz-500/70 text-qobuz-400 hover:bg-qobuz-500 hover:text-background-main'
-                  : 'border-primary-600/70 text-primary-500 hover:bg-primary-500 hover:text-background-main'"
+                class="h-9 px-3.5 rounded-full font-mono text-[11px] uppercase border border-line-strong hover:bg-primary-500 hover:border-primary-500 hover:text-white transition-colors whitespace-nowrap"
                 :title="t('artistView.downloadAlbum')"
-              >GET&nbsp;↓</button>
+              >{{ t('common.getShort') }}&nbsp;↓</button>
             </router-link>
           </div>
 

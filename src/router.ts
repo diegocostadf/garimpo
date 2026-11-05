@@ -46,7 +46,7 @@ const router = createRouter({
     {
       path: '/about',
       name: 'about',
-      component: () => import('./views/AboutView.vue')
+      redirect: { path: '/settings', query: { tab: 'about' } }
     },
     {
       path: '/artist/:id',

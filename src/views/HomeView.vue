@@ -9,14 +9,25 @@ import ErrorState from '../components/ErrorState.vue'
 import ContextMenu from '../components/ContextMenu.vue'
 import { useContextMenu } from '../composables/useContextMenu'
 import type { Track, Album, Playlist } from '../types'
+import { useAuthStore } from '../stores/authStore'
+import { useFavoritesStore } from '../stores/favoritesStore'
 
 const router = useRouter()
 const { t } = useI18n()
 const searchQuery = ref('')
-const linkQuery = ref('')
 const { locale } = useI18n()
+const authStore = useAuthStore()
+const favoritesStore = useFavoritesStore()
+const greeting = computed(() => {
+  const h = new Date().getHours()
+  const base = h < 12 ? t('home.greetingMorning') : h < 18 ? t('home.greetingAfternoon') : t('home.greetingEvening')
+  const name = (authStore.user?.name || '').split(' ')[0]
+  return name ? `${base}, ${name}` : base
+})
+// One box for both jobs: a link goes to the analyzer, anything else is a search.
+const looksLikeLink = computed(() => /^(https?:\/\/|spotify:|www\.)|(deezer|spotify|qobuz|apple|youtube|tidal)\.[a-z]+\//i.test(searchQuery.value.trim()))
 const today = computed(() => {
-  const d = new Date().toLocaleDateString(locale.value, { weekday: 'long', day: 'numeric', month: 'long' })
+  const d = new Date().toLocaleDateString(locale.value, { weekday: 'short', day: '2-digit', month: 'short' })
   return d.charAt(0).toUpperCase() + d.slice(1)
 })
 const newReleases = ref<Album[]>([])
@@ -55,13 +66,11 @@ onMounted(() => {
   loadContent()
 })
 
-function handleLink() {
-  if (linkQuery.value.trim()) {
-    router.push({ path: '/analyzer', query: { url: linkQuery.value.trim() } })
-  }
-}
-
 function handleSearch() {
+  if (looksLikeLink.value) {
+    router.push({ path: '/analyzer', query: { url: searchQuery.value.trim() } })
+    return
+  }
   if (searchQuery.value.trim()) {
     router.push({ path: '/search', query: { q: searchQuery.value } })
   }
@@ -97,36 +106,38 @@ const contextMenuItems = computed(() => [
 
 <template>
   <div class="space-y-12">
-    <!-- Hero: greeting, search and paste-a-link -->
-    <section class="flex flex-col gap-5 max-w-[1240px]">
-      <div class="flex flex-col gap-1.5">
-        <p class="text-sm text-foreground-muted">{{ today }}</p>
-        <h1 class="text-[40px] leading-[1.1] font-semibold tracking-tight">{{ t('home.welcome') }}</h1>
+    <!-- Smart field: search or paste a link -->
+    <form @submit.prevent="handleSearch" class="flex items-center gap-2.5 h-[52px] pl-5 pr-1.5 rounded-full bg-surface border border-line focus-within:border-line-strong transition-colors max-w-[1240px]">
+      <svg class="w-[18px] h-[18px] text-foreground-muted flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+      <input
+        v-model="searchQuery"
+        type="search"
+        :aria-label="t('home.smartPlaceholder')"
+        :placeholder="t('home.smartPlaceholder')"
+        class="flex-1 min-w-0 bg-transparent border-none outline-none text-[15px] text-foreground placeholder:text-foreground-muted"
+        @contextmenu="openSearchMenu"
+      />
+      <button type="submit" class="h-10 px-5 rounded-full bg-primary-500 text-white font-mono text-[12px] uppercase tracking-[0.12em] hover:bg-primary-600 transition-colors">
+        {{ looksLikeLink ? t('analyzer.analyze') : t('home.go') }}
+      </button>
+    </form>
+
+    <!-- Greeting and collection -->
+    <section class="flex flex-wrap items-end justify-between gap-6 max-w-[1240px]">
+      <div class="flex flex-col gap-2">
+        <p class="font-mono text-[11px] uppercase text-foreground-muted">{{ today }}</p>
+        <h1 class="font-display text-[52px] leading-[0.95]">{{ greeting }}</h1>
       </div>
-
-      <form @submit.prevent="handleSearch" class="flex items-center gap-2.5 h-12 px-4 rounded-xl bg-surface border border-line focus-within:border-primary-500 transition-colors">
-        <svg class="w-[18px] h-[18px] text-foreground-muted flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-        <input
-          v-model="searchQuery"
-          type="search"
-          :aria-label="t('nav.search')"
-          :placeholder="t('home.searchPlaceholder')"
-          class="flex-1 min-w-0 bg-transparent border-none outline-none text-[15px] text-foreground placeholder:text-foreground-muted"
-          @contextmenu="openSearchMenu"
-        />
-      </form>
-
-      <form @submit.prevent="handleLink" class="flex flex-wrap items-center gap-2.5 p-2 rounded-2xl bg-surface border border-line">
-        <svg class="w-[18px] h-[18px] ml-2.5 text-foreground-muted flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></svg>
-        <input
-          v-model="linkQuery"
-          type="url"
-          :aria-label="t('nav.linkAnalyzer')"
-          :placeholder="t('analyzer.getStarted')"
-          class="flex-1 min-w-[200px] h-11 bg-transparent border-none outline-none text-[15px] text-foreground placeholder:text-foreground-muted"
-        />
-        <button type="submit" class="h-11 px-5 rounded-[10px] bg-foreground text-background-main text-sm font-medium hover:opacity-90 transition-opacity">{{ t('analyzer.analyze') }}</button>
-      </form>
+      <div class="flex gap-3" :aria-label="t('home.yourCollection')">
+        <router-link to="/favorites" class="w-[124px] h-[124px] rounded-full bg-foreground text-background-main flex flex-col items-center justify-center gap-1 hover:opacity-90 transition-opacity">
+          <span class="font-display text-[26px] leading-none">{{ favoritesStore.favoriteTracks.length }}</span>
+          <span class="font-mono text-[10px] uppercase">{{ t('home.tileTracks') }}</span>
+        </router-link>
+        <router-link to="/favorites" class="w-[124px] h-[124px] rounded-[28px] bg-primary-500 text-white flex flex-col items-center justify-center gap-1 hover:bg-primary-600 transition-colors">
+          <span class="font-display text-[26px] leading-none">{{ favoritesStore.favoritePlaylists.length }}</span>
+          <span class="font-mono text-[10px] uppercase">{{ t('home.tilePlaylists') }}</span>
+        </router-link>
+      </div>
     </section>
 
     <!-- Loading State -->
@@ -147,8 +158,8 @@ const contextMenuItems = computed(() => [
       <!-- New Releases -->
       <section v-if="newReleases.length > 0">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-semibold tracking-tight">{{ t('home.newReleases') }}</h2>
-          <router-link to="/new-releases" class="text-sm text-foreground-muted hover:text-foreground flex items-center gap-1">
+          <h2 class="font-mono text-[12px] uppercase">{{ t('home.newReleases') }}</h2>
+          <router-link to="/new-releases" class="font-mono text-[11px] uppercase text-foreground-muted hover:text-foreground flex items-center gap-1">
             {{ t('home.seeAll') }}
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -167,15 +178,15 @@ const contextMenuItems = computed(() => [
       <!-- Top Tracks -->
       <section v-if="topTracks.length > 0">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-semibold tracking-tight">{{ t('home.topTracks') }}</h2>
-          <router-link to="/charts?type=tracks" class="text-sm text-foreground-muted hover:text-foreground flex items-center gap-1">
+          <h2 class="font-mono text-[12px] uppercase">{{ t('home.topTracks') }}</h2>
+          <router-link to="/charts?type=tracks" class="font-mono text-[11px] uppercase text-foreground-muted hover:text-foreground flex items-center gap-1">
             {{ t('home.seeAll') }}
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
           </router-link>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-1.5">
           <TrackCard
             v-for="track in topTracks"
             :key="track.id"
@@ -187,8 +198,8 @@ const contextMenuItems = computed(() => [
       <!-- Most Streamed Albums -->
       <section v-if="topAlbums.length > 0">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-semibold tracking-tight">{{ t('home.mostStreamedAlbums') }}</h2>
-          <router-link to="/charts?type=albums" class="text-sm text-foreground-muted hover:text-foreground flex items-center gap-1">
+          <h2 class="font-mono text-[12px] uppercase">{{ t('home.mostStreamedAlbums') }}</h2>
+          <router-link to="/charts?type=albums" class="font-mono text-[11px] uppercase text-foreground-muted hover:text-foreground flex items-center gap-1">
             {{ t('home.seeAll') }}
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -207,8 +218,8 @@ const contextMenuItems = computed(() => [
       <!-- Popular Playlists -->
       <section v-if="popularPlaylists.length > 0">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-semibold tracking-tight">{{ t('home.popularPlaylists') }}</h2>
-          <router-link to="/charts?type=playlists" class="text-sm text-foreground-muted hover:text-foreground flex items-center gap-1">
+          <h2 class="font-mono text-[12px] uppercase">{{ t('home.popularPlaylists') }}</h2>
+          <router-link to="/charts?type=playlists" class="font-mono text-[11px] uppercase text-foreground-muted hover:text-foreground flex items-center gap-1">
             {{ t('home.seeAll') }}
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

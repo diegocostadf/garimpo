@@ -157,7 +157,7 @@ export const defaultSettings: Settings = {
   resumeInterruptedOnStartup: false,
   bitrateFallback: true,
   isrcFallback: true,
-  createErrorLog: true,
+  createErrorLog: false,
   createPlaylistFile: false,
   // Only consulted when createPlaylistFile is on. Defaults true so installs
   // that already had playlist files enabled keep writing album M3Us (#121);
@@ -181,10 +181,10 @@ export const defaultSettings: Settings = {
   playlistTrackTemplate: '%position% - %artist% - %title%',
   m3uNameTemplate: '%playlist%',
   // File settings
-  saveArtwork: true,
+  saveArtwork: false,
   embedArtwork: true,
-  saveLyrics: true,
-  syncedLyrics: true,
+  saveLyrics: false,
+  syncedLyrics: false,
   preferSyncedLyrics: false,
   deleteSupersededLyrics: false,
   // Tag settings
@@ -252,7 +252,7 @@ export const defaultSettings: Settings = {
   artistCasing: 'unchanged',
   previewVolume: 80,
   // executeAfterDownload removed - security risk
-  theme: 'system',
+  theme: 'dark',
   colorTheme: 'garimpo',
   language: 'pt-br',
   arl: '',

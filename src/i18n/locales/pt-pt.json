@@ -10,7 +10,12 @@
     "genres": "Géneros",
     "playlistSync": "Sincronização de Playlists",
     "retag": "Retag da Biblioteca",
-    "about": "Acerca de"
+    "about": "Acerca de",
+    "groups": {
+      "discover": "Descobrir",
+      "library": "Minha música",
+      "tools": "Ferramentas"
+    }
   },
   "sidebar": {
     "appName": "Garimpo",
@@ -29,7 +34,15 @@
     "popularPlaylists": "Playlists populares",
     "seeAll": "Ver tudo",
     "searchToStart": "Pesquise música para começar",
-    "newReleases": "Novos Lançamentos"
+    "newReleases": "Novos Lançamentos",
+    "greetingMorning": "Bom dia",
+    "greetingAfternoon": "Boa tarde",
+    "greetingEvening": "Boa noite",
+    "smartPlaceholder": "Busque uma música ou cole um link",
+    "yourCollection": "Sua coleção",
+    "tileTracks": "Faixas",
+    "tilePlaylists": "Playlists",
+    "go": "Ir"
   },
   "search": {
     "placeholder": "Pesquisar faixas, álbuns, artistas ou playlists...",
@@ -342,7 +355,7 @@
   },
   "settings": {
     "title": "Definições",
-    "login": "Sessão",
+    "login": "Entrar",
     "loggedInAs": "Tem sessão iniciada como",
     "hifi": "Hi-Fi",
     "useArl": "Usar ARL em vez disso",
@@ -486,7 +499,7 @@
       "albumLabel": "Editora do álbum",
       "unsyncLyrics": "Letras não sincronizadas",
       "syncLyrics": "Letras sincronizadas",
-      "copyright": "Copyright",
+      "copyright": "Direitos de autor",
       "composer": "Compositor",
       "involvedPeople": "Pessoas envolvidas",
       "sourceId": "Fonte e ID da música",
@@ -679,13 +692,18 @@
       }
     },
     "templateVariables": "Variáveis: {vars}",
-    "exampleArtistName": "Nome do artista"
+    "exampleArtistName": "Nome do artista",
+    "tabs": {
+      "accounts": "Contas",
+      "profiles": "Perfis e backup",
+      "about": "Sobre"
+    }
   },
   "login": {
     "title": "Iniciar sessão no Deezer",
     "emailPassword": "Email e palavra-passe",
     "arlToken": "Token ARL",
-    "email": "Email",
+    "email": "E-mail",
     "password": "Palavra-passe",
     "arl": "Token ARL",
     "arlPlaceholder": "Cole o seu token ARL aqui...",
@@ -792,7 +810,9 @@
     "serverReturned": "O servidor devolveu {status}",
     "goBackEsc": "Voltar (Esc)",
     "cover": "Capa",
-    "durationMinutes": "{mins} min"
+    "durationMinutes": "{mins} min",
+    "getShort": "Baixar",
+    "savedShort": "Salvo"
   },
   "trackCard": {
     "stop": "Parar",
@@ -1253,5 +1273,84 @@
     "everyDay": "Uma vez por dia",
     "everyLaunch": "Só ao abrir a aplicação",
     "everyNever": "Nunca"
+  },
+  "wizard": {
+    "close": "Fechar",
+    "back": "Voltar",
+    "stepOf": "Passo {n} de {total}",
+    "openAssistant": "Abrir assistente passo a passo",
+    "deezer": {
+      "title": "Conecte sua conta Deezer",
+      "intro": "O Garimpo baixa usando a sua própria conta. Você entra no site oficial do Deezer, numa janela segura, e o resto acontece sozinho.",
+      "promise1": "Sua senha é digitada só no site do Deezer, nunca no Garimpo.",
+      "promise2": "Funciona com e-mail, Google, Facebook ou Apple.",
+      "promise3": "Leva menos de um minuto e é feito uma única vez.",
+      "start": "Entrar com o Deezer",
+      "haveArl": "Já tenho um código ARL",
+      "waitingTitle": "Entre na janela do Deezer",
+      "waitingText": "Abrimos o site do Deezer numa janela ao lado. Assim que você entrar, esta tela avança sozinha.",
+      "tip1": "Entre com seu e-mail e senha, ou com Google, Facebook ou Apple.",
+      "tip2": "Se aparecer a verificação \"não sou um robô\", é só completar.",
+      "tip3": "Pronto. A janela fecha sozinha e o Garimpo confirma a conexão.",
+      "reopen": "Reabrir janela",
+      "checking": "Conferindo sua conta…",
+      "arlTitle": "Colar código ARL",
+      "arlText": "O ARL é a chave de acesso que o Deezer guarda no seu navegador. É um código longo de letras e números. Use esta opção só se o login acima não funcionar.",
+      "arlLabel": "Código ARL",
+      "arlPlaceholder": "Cole aqui",
+      "arlSafe": "Seu código fica guardado no cofre de senhas do sistema e só é enviado para o Deezer.",
+      "connect": "Conectar",
+      "doneTitle": "Tudo pronto, {name}",
+      "doneText": "Sua conta está conectada. Da próxima vez que abrir o Garimpo, você já entra direto.",
+      "plan": "Plano",
+      "maxQuality": "Qualidade máxima",
+      "region": "Região",
+      "finish": "Começar a garimpar",
+      "windowClosed": "A janela do Deezer foi fechada antes do login."
+    },
+    "spotify": {
+      "title": "Conectar o Spotify",
+      "intro": "Com o Spotify conectado, você cola links de playlists e o Garimpo encontra as mesmas músicas no Deezer ou no Qobuz. Ele só lê nomes de músicas, nunca baixa nada do Spotify.",
+      "requirement": "O Spotify exige uma conta Premium e uma chave de desenvolvedor gratuita. A gente cria essa chave com você no próximo passo, em menos de dois minutos.",
+      "start": "Começar",
+      "createTitle": "Criar sua chave no Spotify",
+      "createText": "Abrimos o painel do Spotify numa janela, com o formulário já preenchido. Você só precisa entrar e confirmar.",
+      "create1": "Entre com a sua conta do Spotify, se pedir.",
+      "create2": "Aceite os termos de desenvolvedor do Spotify.",
+      "create3": "Clique em Save no final do formulário.",
+      "prefilled": "Preenchido para você",
+      "openDashboard": "Abrir painel do Spotify",
+      "haveKeys": "Já tenho Client ID e Secret",
+      "captureTitle": "Esperando o Spotify",
+      "captureText": "Quando o app aparecer no painel, abra Settings e clique em View client secret. O Garimpo copia as duas chaves sozinho.",
+      "gotId": "Client ID encontrado",
+      "gotSecret": "Client Secret encontrado",
+      "waiting": "Esperando…",
+      "pasteTitle": "Colar as chaves",
+      "keyHint": "32 letras e números",
+      "testConnect": "Testar e conectar",
+      "testing": "Testando…",
+      "doneTitle": "Spotify conectado",
+      "doneText": "Agora é só colar links do Spotify em qualquer campo de busca.",
+      "finish": "Concluir",
+      "windowClosed": "A janela do Spotify foi fechada antes de encontrarmos as chaves. Tente de novo ou cole as chaves."
+    }
+  },
+  "rack": {
+    "title": "Mesa de downloads",
+    "live": "{n} ao vivo",
+    "stored": "{n} salvos",
+    "folder": "Pasta",
+    "pause": "Pausar",
+    "resume": "Retomar",
+    "clear": "Limpar",
+    "channel": "Canal {n}",
+    "queued": "Na fila",
+    "saved": "Salvo",
+    "failed": "Falhou",
+    "totalRate": "Taxa total",
+    "empty": "Nada baixando agora. Escolha uma música e toque em Baixar.",
+    "collapse": "Esconder mesa",
+    "expand": "Mostrar mesa"
   }
 }

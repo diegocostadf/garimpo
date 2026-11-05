@@ -10,7 +10,12 @@
     "genres": "Жанры",
     "playlistSync": "Синхронизация плейлистов",
     "retag": "Обновление тегов",
-    "about": "О программе"
+    "about": "О программе",
+    "groups": {
+      "discover": "Discover",
+      "library": "My music",
+      "tools": "Tools"
+    }
   },
   "sidebar": {
     "appName": "Garimpo",
@@ -29,7 +34,15 @@
     "popularPlaylists": "Популярные плейлисты",
     "seeAll": "Смотреть все",
     "searchToStart": "Начните поиск музыки",
-    "newReleases": "Новые релизы"
+    "newReleases": "Новые релизы",
+    "greetingMorning": "Good morning",
+    "greetingAfternoon": "Good afternoon",
+    "greetingEvening": "Good evening",
+    "smartPlaceholder": "Search for a song or paste a link",
+    "yourCollection": "Your collection",
+    "tileTracks": "Tracks",
+    "tilePlaylists": "Playlists",
+    "go": "Go"
   },
   "search": {
     "placeholder": "Поиск треков, альбомов, исполнителей или плейлистов...",
@@ -679,7 +692,12 @@
       }
     },
     "templateVariables": "Переменные: {vars}",
-    "exampleArtistName": "Имя исполнителя"
+    "exampleArtistName": "Имя исполнителя",
+    "tabs": {
+      "accounts": "Accounts",
+      "profiles": "Profiles and backup",
+      "about": "About"
+    }
   },
   "login": {
     "title": "Вход в Deezer",
@@ -792,7 +810,9 @@
     "serverReturned": "Сервер вернул {status}",
     "goBackEsc": "Назад (Esc)",
     "cover": "Обложка",
-    "durationMinutes": "{mins} мин"
+    "durationMinutes": "{mins} мин",
+    "getShort": "Get",
+    "savedShort": "Saved"
   },
   "errors": {
     "generic": "Произошла ошибка",
@@ -1253,5 +1273,84 @@
     "everyDay": "Раз в день",
     "everyLaunch": "Только при запуске приложения",
     "everyNever": "Никогда"
+  },
+  "wizard": {
+    "close": "Close",
+    "back": "Back",
+    "stepOf": "Step {n} of {total}",
+    "openAssistant": "Open step-by-step assistant",
+    "deezer": {
+      "title": "Connect your Deezer account",
+      "intro": "Garimpo downloads with your own account. You sign in on Deezer's official site, in a secure window, and the rest happens on its own.",
+      "promise1": "Your password is typed only on Deezer's site, never in Garimpo.",
+      "promise2": "Works with email, Google, Facebook or Apple.",
+      "promise3": "Takes less than a minute and you only do it once.",
+      "start": "Sign in with Deezer",
+      "haveArl": "I already have an ARL code",
+      "waitingTitle": "Sign in on the Deezer window",
+      "waitingText": "We opened Deezer in a window next to this one. As soon as you sign in, this screen moves on by itself.",
+      "tip1": "Sign in with email and password, or with Google, Facebook or Apple.",
+      "tip2": "If an \"I'm not a robot\" check appears, just complete it.",
+      "tip3": "That's it. The window closes itself and Garimpo confirms the connection.",
+      "reopen": "Reopen window",
+      "checking": "Checking your account…",
+      "arlTitle": "Paste an ARL code",
+      "arlText": "The ARL is the access key Deezer keeps in your browser. It is a long code of letters and numbers. Use this only if signing in above doesn't work.",
+      "arlLabel": "ARL code",
+      "arlPlaceholder": "Paste it here",
+      "arlSafe": "Your code is stored in your system's password vault and is only ever sent to Deezer.",
+      "connect": "Connect",
+      "doneTitle": "All set, {name}",
+      "doneText": "Your account is connected. Next time you open Garimpo you go straight in.",
+      "plan": "Plan",
+      "maxQuality": "Best quality",
+      "region": "Region",
+      "finish": "Start digging",
+      "windowClosed": "The Deezer window was closed before you signed in."
+    },
+    "spotify": {
+      "title": "Connect Spotify",
+      "intro": "With Spotify connected, you paste playlist links and Garimpo finds the same songs on Deezer or Qobuz. It only reads song names, it never downloads from Spotify.",
+      "requirement": "Spotify requires a Premium account and a free developer key. We create that key with you in the next step, in under two minutes.",
+      "start": "Get started",
+      "createTitle": "Create your Spotify key",
+      "createText": "We open the Spotify dashboard in a window with the form already filled in. You just sign in and confirm.",
+      "create1": "Sign in with your Spotify account if asked.",
+      "create2": "Accept the Spotify developer terms.",
+      "create3": "Click Save at the end of the form.",
+      "prefilled": "Filled in for you",
+      "openDashboard": "Open Spotify dashboard",
+      "haveKeys": "I already have a Client ID and Secret",
+      "captureTitle": "Waiting for Spotify",
+      "captureText": "When your app shows up in the dashboard, open its Settings and click View client secret. Garimpo copies both keys by itself.",
+      "gotId": "Client ID found",
+      "gotSecret": "Client Secret found",
+      "waiting": "Waiting…",
+      "pasteTitle": "Paste the keys",
+      "keyHint": "32 letters and numbers",
+      "testConnect": "Test and connect",
+      "testing": "Testing…",
+      "doneTitle": "Spotify connected",
+      "doneText": "Now just paste Spotify links into any search field.",
+      "finish": "Done",
+      "windowClosed": "The Spotify window was closed before the keys were found. You can try again or paste them."
+    }
+  },
+  "rack": {
+    "title": "Transfer rack",
+    "live": "{n} live",
+    "stored": "{n} saved",
+    "folder": "Folder",
+    "pause": "Pause",
+    "resume": "Resume",
+    "clear": "Clear",
+    "channel": "Ch {n}",
+    "queued": "Queued",
+    "saved": "Saved",
+    "failed": "Failed",
+    "totalRate": "Total rate",
+    "empty": "Nothing downloading. Pick a song and hit Get.",
+    "collapse": "Hide rack",
+    "expand": "Show rack"
   }
 }

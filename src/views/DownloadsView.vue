@@ -31,8 +31,8 @@ function showSubstituted(src: { title: string; substitutedTracks?: SubstitutedTr
 const expandedItems = ref<Set<string>>(new Set())
 // Track which album/playlist rows have their full per-track list expanded
 const expandedTrackLists = ref<Set<string>>(new Set())
-const showHistory = ref(false)
-const showStats = ref(false)
+const showHistory = ref(true)
+const showStats = ref(true)
 
 const downloadStats = computed(() => {
   const history = downloadStore.downloadHistory
@@ -560,15 +560,9 @@ function copyAllErrorDetails() {
     </div>
     <!-- Download Statistics (below session counters) -->
     <div v-if="downloadStats && !isSlim" class="mt-4">
-      <button
-        @click="showStats = !showStats"
-        class="flex items-center gap-2 text-foreground-muted hover:text-foreground transition-colors mb-3"
-      >
-        <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-90': showStats }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
+      <div class="flex items-center gap-2 text-foreground-muted mb-3">
         <span class="font-mono text-[10px] tracking-[0.2em] uppercase">{{ t('downloads.statistics') }}</span>
-      </button>
+      </div>
 
       <div v-if="showStats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
         <div class="card p-4 text-center">
@@ -1220,15 +1214,9 @@ function copyAllErrorDetails() {
     <!-- Download History Toggle -->
     <div class="mt-8 border-t border-line pt-6">
       <div class="flex items-center justify-between mb-4">
-        <button
-          @click="showHistory = !showHistory"
-          class="flex items-center gap-2 text-sm text-foreground-muted hover:text-foreground transition-colors"
-        >
-          <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-90': showHistory }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
+        <div class="flex items-center gap-2 text-sm text-foreground-muted">
           {{ t('downloads.historyCount', { count: downloadStore.downloadHistory.length }) }}
-        </button>
+        </div>
         <button
           v-if="showHistory && downloadStore.downloadHistory.length > 0"
           @click="downloadStore.clearHistory()"

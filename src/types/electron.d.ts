@@ -75,6 +75,11 @@ declare global {
         openLoginWindow: () => Promise<{ success: boolean; arl?: string; error?: string }>
         closeLoginWindow: () => Promise<void>
       }
+      spotifyDeveloper: {
+        openWindow: () => Promise<{ success: boolean; clientId?: string; clientSecret?: string; error?: string }>
+        closeWindow: () => Promise<void>
+        onProgress: (callback: (data: { clientId: boolean; clientSecret: boolean }) => void) => () => void
+      }
       qobuzLogin: {
         openLoginWindow: () => Promise<{ success: boolean; userId?: string; token?: string; error?: string }>
       }

@@ -129,7 +129,7 @@ const contextMenuItems = computed(() => [
          the GET button in the hover overlay is the explicit download. -->
     <div
       @click="navigate"
-      class="relative aspect-square mb-3 cursor-pointer overflow-hidden rounded-xl"
+      class="relative aspect-square mb-3 cursor-pointer overflow-hidden rounded-[20px]"
       :class="{ 'opacity-50 pointer-events-none': isDownloading }"
     >
       <!-- Album cover image -->
@@ -139,13 +139,13 @@ const contextMenuItems = computed(() => [
         :alt="album.title"
         loading="lazy"
         decoding="async"
-        class="w-full h-full object-cover rounded-xl bg-background-tertiary transition-transform duration-200 group-hover:scale-[1.02]"
+        class="w-full h-full object-cover rounded-[20px] bg-background-tertiary transition-transform duration-200 group-hover:scale-[1.02]"
         @error="handleImageError"
       />
       <!-- Fallback placeholder when no image or image fails to load -->
       <div
         v-else
-        class="w-full h-full rounded-xl bg-background-tertiary flex items-center justify-center"
+        class="w-full h-full rounded-[20px] bg-background-tertiary flex items-center justify-center"
       >
         <svg class="w-12 h-12 text-foreground-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -168,7 +168,7 @@ const contextMenuItems = computed(() => [
       <!-- Download overlay — the GET button is the explicit download action.
            @click.stop keeps it from also triggering the cover's open-album
            click; clicking the dimmed area (not the button) opens the album. -->
-      <div class="absolute inset-0 rounded-xl bg-black/25 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity
+      <div class="absolute inset-0 rounded-[20px] bg-black/25 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity
                   flex items-end justify-end p-3">
         <button
           type="button"

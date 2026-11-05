@@ -460,7 +460,7 @@ export class AppServer extends EventEmitter {
     skipDuplicateTracks: false,
     bitrateFallback: true,
     isrcFallback: true,
-    createErrorLog: true,
+    createErrorLog: false,
     createPlaylistFile: false,
     createAlbumPlaylistFile: true,
     clearQueueOnClose: false,
@@ -481,10 +481,10 @@ export class AppServer extends EventEmitter {
     playlistTrackTemplate: '%position% - %artist% - %title%',
     m3uNameTemplate: '%playlist%',
     // File settings
-    saveArtwork: true,
+    saveArtwork: false,
     embedArtwork: true,
-    saveLyrics: true,
-    syncedLyrics: true,
+    saveLyrics: false,
+    syncedLyrics: false,
     // Off by default: turning it on changes which files an existing user gets,
     // so it is opt-in rather than a silent change to their library (#141).
     preferSyncedLyrics: false,

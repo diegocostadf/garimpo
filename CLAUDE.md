@@ -4,7 +4,7 @@
 
 - Cores vêm de tokens. Use `bg-surface`, `border-line`, `hover:bg-hover`, `text-foreground`, `text-foreground-muted` e a escala `primary-*`. Não use `white/…`, `black/…` ou `zinc-*` para superfícies: quebram o modo claro.
 - O tema padrão é `garimpo` (`src/assets/main.css`). Qualquer token novo precisa de valor no bloco escuro e no bloco `[data-mode="light"][data-theme="garimpo"]`.
-- Tipografia é Geist Sans; Geist Mono só para números e dados técnicos (bitrate, ISRC, duração). Nada de rótulos em caixa alta com espaçamento largo.
+- Tipografia é IBM Plex Sans; IBM Plex Mono só para números e dados técnicos (bitrate, ISRC, duração). Nada de rótulos em caixa alta com espaçamento largo.
 - Alvos de toque com pelo menos 44px e texto com contraste AA nos dois modos.
 - Uma ação principal por tela, em dourado. As demais são secundárias.
 

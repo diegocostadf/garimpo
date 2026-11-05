@@ -122,8 +122,8 @@ const contextMenuItems = computed(() => [
 
 <template>
   <div
-    class="track-card group flex items-center gap-3 px-3 py-2 rounded-xl transition-colors"
-    :class="isPlaying ? 'bg-primary-500/10' : 'hover:bg-hover'"
+    class="track-card group flex items-center gap-3 pl-3 pr-2 min-h-[56px] rounded-full transition-colors"
+    :class="isPlaying ? 'bg-primary-500 text-white' : 'bg-surface hover:bg-hover'"
     @contextmenu="openMenu"
   >
     <!-- Index / Play button -->
@@ -245,9 +245,9 @@ const contextMenuItems = computed(() => [
         :title="downloadState === 'downloading' ? t('trackCard.inQueue') : downloadState === 'completed' ? t('trackCard.alreadyDownloaded') : t('trackCard.download')"
         :disabled="downloadState !== 'available'"
       >
-        <template v-if="downloadState === 'downloading'">QUEUED</template>
-        <template v-else-if="downloadState === 'completed'">STORED</template>
-        <template v-else>GET&nbsp;↓</template>
+        <template v-if="downloadState === 'downloading'">{{ t('rack.queued') }}</template>
+        <template v-else-if="downloadState === 'completed'">{{ t('common.savedShort') }}</template>
+        <template v-else>{{ t('common.getShort') }}&nbsp;↓</template>
       </button>
     </div>
 
@@ -263,43 +263,27 @@ const contextMenuItems = computed(() => [
 </template>
 
 <style scoped>
-/* Mockup .get — mono bordered acquisition button; fills chartreuse on hover */
+/* Pill download button: outlined, fills with the accent on hover. */
 .get-btn {
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
-  color: rgb(var(--primary-500));
-  border: 1px solid rgb(var(--primary-600) / 0.7);
-  padding: 4px 10px;
+  text-transform: uppercase;
+  color: rgb(var(--fg-default));
+  border: 1px solid rgb(var(--line-strong));
+  border-radius: 999px;
+  min-height: 36px;
+  padding: 0 14px;
   background: none;
   white-space: nowrap;
-  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 .get-btn:not(:disabled):hover {
   background: rgb(var(--primary-500));
-  color: rgb(var(--bg-main));
+  color: #fff;
   border-color: rgb(var(--primary-500));
-  box-shadow: 0 0 14px rgb(var(--primary-500) / 0.35);
 }
-/* Channel Q — Qobuz-sourced tracks acquire in the fixed brand cyan */
-.get-btn-qobuz {
-  color: #59C2D6;
-  border-color: rgb(89 194 214 / 0.7);
-}
-.get-btn-qobuz:not(:disabled):hover {
-  background: #59C2D6;
-  color: rgb(var(--bg-main));
-  border-color: #59C2D6;
-  box-shadow: 0 0 14px rgb(89 194 214 / 0.35);
-}
-.get-btn-queued {
-  color: #ffb454;
-  border-color: rgb(255 180 84 / 0.5);
-  cursor: default;
-}
-.get-btn-stored {
-  color: #22c55e;
-  border-color: rgb(34 197 94 / 0.5);
-  cursor: default;
-}
+.get-btn-qobuz:not(:disabled):hover { background: #0e7490; border-color: #0e7490; }
+.get-btn-queued { color: rgb(var(--primary-400)); border-color: rgb(var(--primary-500)); cursor: default; }
+.get-btn-stored { color: rgb(var(--fg-muted)); border-style: dashed; cursor: default; }
 </style>

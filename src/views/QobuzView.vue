@@ -231,7 +231,7 @@ const sections = [
 
     <!-- Not connected -->
     <div v-if="notConnected" class="text-center py-20 space-y-4">
-      <div class="font-mono text-[11px] tracking-[0.2em] uppercase text-foreground-muted">Q:LINK DOWN</div>
+      <div class="font-mono text-[11px] uppercase text-foreground-muted">{{ t('qobuz.notConnected') }}</div>
       <p class="text-foreground-muted">{{ t('settings.qobuz.description') }}</p>
       <button
         @click="router.push('/settings')"

@@ -78,6 +78,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
     openLoginWindow: () => ipcRenderer.invoke('qobuz:openLoginWindow')
   },
 
+  spotifyDeveloper: {
+    openWindow: () => ipcRenderer.invoke('spotify:openDeveloperWindow'),
+    closeWindow: () => ipcRenderer.invoke('spotify:closeDeveloperWindow'),
+    onProgress: (callback: (data: { clientId: boolean; clientSecret: boolean }) => void) => {
+      const listener = (_: unknown, data: { clientId: boolean; clientSecret: boolean }) => callback(data)
+      ipcRenderer.on('spotify:developerProgress', listener)
+      return () => { ipcRenderer.removeListener('spotify:developerProgress', listener) }
+    }
+  },
+
   // Playlist sync events
   playlistSync: {
     onSyncStart: (callback: (data: { playlistId: string }) => void) => {
@@ -187,6 +197,11 @@ declare global {
       deezerLogin: {
         openLoginWindow: () => Promise<{ success: boolean; arl?: string; error?: string }>
         closeLoginWindow: () => Promise<void>
+      }
+      spotifyDeveloper: {
+        openWindow: () => Promise<{ success: boolean; clientId?: string; clientSecret?: string; error?: string }>
+        closeWindow: () => Promise<void>
+        onProgress: (callback: (data: { clientId: boolean; clientSecret: boolean }) => void) => () => void
       }
       playlistSync: {
         onSyncStart: (callback: (data: { playlistId: string }) => void) => void

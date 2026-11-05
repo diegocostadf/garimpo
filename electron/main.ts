@@ -969,6 +969,130 @@ ipcMain.handle('deezer:closeLoginWindow', () => {
   }
 })
 
+// --- Spotify developer key: guided capture in an in-app window ---
+// Spotify's Web API needs a developer app (Client ID + Secret) owned by the
+// user. Instead of sending people to copy two codes by hand, we open the
+// developer dashboard in a window, prefill the "create app" form (name,
+// description, redirect URI, Web API), and read the two keys off the app's
+// settings page once the user reveals the secret. The user still signs in,
+// accepts Spotify's terms and clicks Save themselves. Nothing is submitted
+// for them. Pasting the keys by hand stays available in the wizard.
+let spotifyDevWindow: BrowserWindow | null = null
+const SPOTIFY_DEV_PARTITION = 'persist:spotify-dev'
+
+function spotifyDashboardProbe(redirectUri: string): string {
+  return `(() => {
+    const setVal = (el, v) => {
+      if (!el || el.value) return
+      const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype
+      const desc = Object.getOwnPropertyDescriptor(proto, 'value')
+      if (desc && desc.set) desc.set.call(el, v); else el.value = v
+      el.dispatchEvent(new Event('input', { bubbles: true }))
+      el.dispatchEvent(new Event('change', { bubbles: true }))
+    }
+    const byLabel = (re) => {
+      for (const l of document.querySelectorAll('label')) {
+        if (re.test(l.textContent || '')) {
+          const id = l.getAttribute('for')
+          const el = id ? document.getElementById(id) : l.querySelector('input, textarea')
+          if (el) return el
+        }
+      }
+      return null
+    }
+    if (/\\/dashboard\\/create/.test(location.pathname)) {
+      setVal(byLabel(/app name/i) || document.querySelector('input[name="name"]'), 'Garimpo')
+      setVal(byLabel(/app description/i) || document.querySelector('textarea[name="description"]'), 'Reads my playlists so I can find the same songs in my music library.')
+      setVal(byLabel(/redirect uri/i) || document.querySelector('input[name*="redirect" i]'), ${JSON.stringify(redirectUri)})
+      const web = Array.from(document.querySelectorAll('label')).find((l) => /^\\s*web api\\s*$/i.test(l.textContent || ''))
+      const forId = web && web.getAttribute('for')
+      const cb = web && (forId ? document.getElementById(forId) : web.querySelector('input'))
+      if (cb && cb.type === 'checkbox' && !cb.checked) cb.click()
+    }
+    const text = document.body ? document.body.innerText : ''
+    const id = (text.match(/Client ID\\s*([0-9a-f]{32})/i) || [])[1] || null
+    const secret = (text.match(/Client secret\\s*([0-9a-f]{32})/i) || [])[1] || null
+    return { clientId: id, clientSecret: secret && secret !== id ? secret : null }
+  })()`
+}
+
+ipcMain.handle('spotify:openDeveloperWindow', async (event) => {
+  if (spotifyDevWindow && !spotifyDevWindow.isDestroyed()) {
+    spotifyDevWindow.focus()
+    return { success: false, error: 'already-open' }
+  }
+
+  const sender = event.sender
+  const redirectUri = `http://127.0.0.1:${server?.getPort() || DEFAULT_PORT}/callback`
+  const probe = spotifyDashboardProbe(redirectUri)
+
+  return new Promise((resolve) => {
+    let finished = false
+    let lastReported = ''
+
+    const win = new BrowserWindow({
+      width: 1100,
+      height: 820,
+      parent: mainWindow || undefined,
+      modal: false,
+      show: false,
+      title: 'Spotify for Developers',
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: true,
+        partition: SPOTIFY_DEV_PARTITION
+      }
+    })
+    spotifyDevWindow = win
+    // Present as plain Chrome so Spotify's sign-in does not refuse the window.
+    const ua = win.webContents.getUserAgent().replace(/\s(Electron|garimpo)\/\S+/gi, '')
+    win.webContents.setUserAgent(ua)
+    win.loadURL('https://developer.spotify.com/dashboard/create')
+    win.once('ready-to-show', () => win.show())
+
+    const finish = (result: { success: boolean; clientId?: string; clientSecret?: string; error?: string }) => {
+      if (finished) return
+      finished = true
+      clearInterval(timer)
+      if (!win.isDestroyed()) win.close()
+      spotifyDevWindow = null
+      resolve(result)
+    }
+
+    const timer = setInterval(async () => {
+      if (win.isDestroyed()) return
+      try {
+        const found = await win.webContents.executeJavaScript(probe, true) as { clientId: string | null; clientSecret: string | null }
+        const state = `${!!found?.clientId}:${!!found?.clientSecret}`
+        if (state !== lastReported && !sender.isDestroyed()) {
+          lastReported = state
+          sender.send('spotify:developerProgress', { clientId: !!found?.clientId, clientSecret: !!found?.clientSecret })
+        }
+        if (found?.clientId && found?.clientSecret) {
+          finish({ success: true, clientId: found.clientId, clientSecret: found.clientSecret })
+        }
+      } catch {
+        // Page mid-navigation; the next tick tries again.
+      }
+    }, 1000)
+
+    win.on('closed', () => {
+      spotifyDevWindow = null
+      if (!finished) {
+        finished = true
+        clearInterval(timer)
+        resolve({ success: false, error: 'closed' })
+      }
+    })
+  })
+})
+
+ipcMain.handle('spotify:closeDeveloperWindow', () => {
+  if (spotifyDevWindow && !spotifyDevWindow.isDestroyed()) spotifyDevWindow.close()
+  spotifyDevWindow = null
+})
+
 // --- Qobuz login: capture user_auth_token from a real browser session ---
 // Qobuz moved to OAuth+reCAPTCHA (2026-04), so raw email/password login no
 // longer works. We open the real play.qobuz.com login in a window, let the user
