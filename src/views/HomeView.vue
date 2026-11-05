@@ -189,6 +189,7 @@ const contextMenuItems = computed(() => [
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-1.5">
           <TrackCard
             v-for="track in topTracks"
+            :queue="topTracks"
             :key="track.id"
             :track="track"
           />

@@ -18,6 +18,9 @@ import { libraryIndex } from './services/libraryIndex'
 import { buildAlbumContext } from './services/albumContext'
 import { fetchDeezerPublicJson, fetchDeezerPublicPaginated } from './services/deezerPublicApi'
 import { logSafe } from './services/logSafe'
+import { pipeRemoteAudio, serveLocalAudio } from './services/mediaProxy'
+import { djLibrary } from './services/djLibrary'
+import { readSource, startMatchJob, getMatchJob, cancelMatchJob } from './services/playlistImport'
 
 // File-based cache for discography (persists across app restarts)
 const DISCOGRAPHY_FILE_CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
@@ -698,6 +701,10 @@ export class AppServer extends EventEmitter {
     }
 
     const url = new URL(req.url || '/', `http://${this.host}:${this.port}`)
+    if (url.pathname.startsWith('/api/dj/')) {
+      await this.handleDj(url, req, res)
+      return
+    }
     const path = url.pathname
 
     // Security: Per-operation rate limiting
@@ -937,6 +944,33 @@ export class AppServer extends EventEmitter {
         break
       case '/api/deezer/genre-chart':
         await this.handleDeezerGenreChart(url, res)
+        break
+      case '/api/import/read':
+        await this.handleImportRead(req, res)
+        break
+      case '/api/import/match': {
+        const body = await this.parseBody(req)
+        const tracks = Array.isArray(body?.tracks) ? body.tracks.slice(0, 5000) : []
+        this.sendJSON(res, { jobId: startMatchJob(tracks) })
+        break
+      }
+      case '/api/import/status': {
+        const job = getMatchJob(url.searchParams.get('id') || '', Number(url.searchParams.get('from') || 0))
+        if (job) this.sendJSON(res, job)
+        else this.sendJSON(res, { error: 'Job not found' }, 404)
+        break
+      }
+      case '/api/import/cancel': {
+        const body = await this.parseBody(req)
+        cancelMatchJob(String(body?.id || ''))
+        this.sendJSON(res, { ok: true })
+        break
+      }
+      case '/api/preview/stream':
+        pipeRemoteAudio(url.searchParams.get('url') || '', req, res)
+        break
+      case '/api/library/file':
+        serveLocalAudio(url.searchParams.get('path') || '', req, res)
         break
       case '/api/qobuz/preview':
         await this.handleQobuzPreview(url, res)
@@ -3678,6 +3712,69 @@ export class AppServer extends EventEmitter {
   /** Resolve a playable stream URL for a Qobuz track preview. Qobuz has no
    *  static 30s preview clips like Deezer — the renderer requests a signed
    *  MP3 stream URL on demand and caps playback client-side. */
+  private async handleDj(url: URL, req: IncomingMessage, res: ServerResponse): Promise<void> {
+    try {
+      const body = req.method === 'POST' ? await this.parseBody(req) : {}
+      const ids: string[] | undefined = Array.isArray(body?.ids) ? body.ids.map(String) : undefined
+      switch (url.pathname) {
+        case '/api/dj/state':
+          this.sendJSON(res, { ...djLibrary.state(), seratoFolders: djLibrary.seratoFolders() })
+          return
+        case '/api/dj/scan':
+          this.sendJSON(res, { tracks: await djLibrary.scan(String(body?.folder || '')) })
+          return
+        case '/api/dj/forget':
+          djLibrary.forgetFolder(String(body?.folder || ''))
+          this.sendJSON(res, { ok: true })
+          return
+        case '/api/dj/analysis':
+          this.sendJSON(res, djLibrary.saveAnalysis(String(body?.path || ''), body?.result || {}, body?.writeTags !== false))
+          return
+        case '/api/dj/playlist':
+          this.sendJSON(res, djLibrary.upsertPlaylist({ id: body?.id, name: String(body?.name || ''), paths: Array.isArray(body?.paths) ? body.paths.map(String) : [] }))
+          return
+        case '/api/dj/playlist/delete':
+          djLibrary.deletePlaylist(String(body?.id || ''))
+          this.sendJSON(res, { ok: true })
+          return
+        case '/api/dj/export': {
+          const target = String(body?.target || '')
+          if (target === 'serato') this.sendJSON(res, { files: djLibrary.exportSerato(ids).crates })
+          else if (target === 'rekordbox') this.sendJSON(res, { files: [djLibrary.exportRekordbox(ids)] })
+          else if (target === 'm3u') this.sendJSON(res, { files: djLibrary.exportM3u(ids) })
+          else this.sendJSON(res, { error: 'Unknown target' }, 400)
+          return
+        }
+        case '/api/dj/import': {
+          const source = String(body?.source || '')
+          const file = String(body?.file || '')
+          if (source === 'serato') this.sendJSON(res, { playlists: djLibrary.importSerato() })
+          else if (source === 'rekordbox' && file) this.sendJSON(res, { playlists: djLibrary.importRekordbox(file) })
+          else if (source === 'm3u' && file) this.sendJSON(res, { playlists: djLibrary.importM3u(file) })
+          else this.sendJSON(res, { error: 'Unknown source' }, 400)
+          return
+        }
+        default:
+          this.sendJSON(res, { error: 'Not found' }, 404)
+      }
+    } catch (error: any) {
+      console.error('[DJ]', logSafe(error?.message || ''))
+      this.sendJSON(res, { error: String(error?.message || 'error').slice(0, 200) }, 500)
+    }
+  }
+
+  private async handleImportRead(req: IncomingMessage, res: ServerResponse): Promise<void> {
+    try {
+      const body = await this.parseBody(req)
+      const playlist = await readSource({ url: body?.url, text: body?.text, name: body?.name })
+      this.sendJSON(res, playlist)
+    } catch (error: any) {
+      const code = /^E_[A-Z]+$/.test(error?.message || '') ? error.message : 'E_NETWORK'
+      if (code === 'E_NETWORK') console.error('[Import] read failed:', logSafe(error?.message || ''))
+      this.sendJSON(res, { error: code }, 400)
+    }
+  }
+
   private async handleQobuzPreview(url: URL, res: ServerResponse): Promise<void> {
     const id = validateQobuzId(url.searchParams.get('id'))
     if (!id) {

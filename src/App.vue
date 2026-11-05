@@ -3,6 +3,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from './components/Sidebar.vue'
 import TitleBar from './components/TitleBar.vue'
+import FloatingPlayer from './components/FloatingPlayer.vue'
 import DownloadRack from './components/DownloadRack.vue'
 import BrandMark from './components/BrandMark.vue'
 import DeezerWizard from './components/DeezerWizard.vue'
@@ -263,7 +264,7 @@ onBeforeUnmount(() => {
       <Sidebar />
 
       <!-- Main Content -->
-      <main class="flex-1 overflow-hidden flex flex-col">
+      <main class="relative flex-1 overflow-hidden flex flex-col">
         <div class="flex-1 overflow-y-auto px-10 py-8">
           <router-view v-slot="{ Component }">
             <transition name="fade" mode="out-in">
@@ -272,6 +273,8 @@ onBeforeUnmount(() => {
           </router-view>
         </div>
 
+        <!-- Floating preview player -->
+        <FloatingPlayer />
       </main>
 
       <!-- Download desk: channels with faders, always beside the content -->

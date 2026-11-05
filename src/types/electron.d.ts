@@ -42,6 +42,7 @@ declare global {
       close: () => Promise<void>
       isMaximized: () => Promise<boolean>
       selectFolder: (defaultPath?: string) => Promise<string | null>
+      selectFile: (opts?: { title?: string; extensions?: string[]; defaultPath?: string }) => Promise<string | null>
       openPath: (path: string) => Promise<void>
       openExternal: (url: string) => Promise<void>
       deletePath: (path: string) => Promise<void>

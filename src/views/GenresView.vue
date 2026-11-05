@@ -354,7 +354,7 @@ onMounted(loadGenres)
             <span v-if="dzChart.tracks.total" class="font-mono text-[10px] text-foreground-muted">{{ chartTracks.length }} / {{ dzChart.tracks.total }}</span>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <TrackCard v-for="track in chartTracks" :key="track.id" :track="track" />
+            <TrackCard v-for="track in chartTracks" :key="track.id" :track="track" :queue="chartTracks" />
           </div>
           <div v-if="dzChart.tracks.loading" class="flex items-center justify-center py-8">
             <div class="animate-spin w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full"></div>

@@ -30,7 +30,7 @@ for (const f of readdirSync(localeDir).filter(f => f.endsWith('.json') && f !== 
 }
 
 // Branded labels stay English on purpose (see CLAUDE.md § Localization).
-const BRAND = /^(Transfer Rack|AGGREGATE RATE|Pull the signal|down\.|SIGNAL DECK|ACQUISITION CONSOLE|CHANNEL Q|Q:LINK(ED)?|LINK ESTABLISHED|LINK DOWN|Garimpo|Electron|Chromium|Node)$/i
+const BRAND = /^(Transfer Rack|AGGREGATE RATE|Pull the signal|down\.|SIGNAL DECK|ACQUISITION CONSOLE|CHANNEL Q|Q:LINK(ED)?|LINK ESTABLISHED|LINK DOWN|Garimpo|Electron|Chromium|Node|Serato|Rekordbox|Apple Music|YouTube Music|TIM Music|M3U|Serato → Rekordbox|Rekordbox → Serato)$/i
 // Names and tokens that are never translated: services, formats, keys, runtimes, theme names.
 const NAMES = new Set(['Deezer', 'Qobuz', 'Spotify', 'Tidal', 'FLAC', 'MP3', 'AAC', 'OGG', 'ISRC', 'UPC', 'ARL', 'URL', 'API', 'ID', 'OK', 'N/A', 'Hi-Res', 'HiRes', 'Electron', 'Chromium', 'Node', 'GitHub', 'Windows', 'macOS', 'Linux', 'Vue', 'JSON', 'CSV', 'M3U', 'ReplayGain', 'Esc', 'Ctrl', 'Cmd', 'Alt', 'Shift', 'Enter', 'Tab', 'Space', 'Backspace', 'Escape', 'Meta', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Delete', 'Insert', 'EP', 'Signal', 'Violet', 'Rose', 'Ocean', 'Sunset', 'Mint', 'Dracula', 'Nord'])
 

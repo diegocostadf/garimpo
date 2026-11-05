@@ -266,7 +266,7 @@ function createWindow() {
       responseHeaders: {
         ...details.responseHeaders,
         'Content-Security-Policy': [
-          "default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src 'self' https://www.google.com; connect-src 'self' http://127.0.0.1:* http://localhost:* https://api.deezer.com https://*.dzcdn.net https://*.deezer.com https://api.github.com https://www.google.com; img-src 'self' data: https://*.dzcdn.net https://*.deezer.com https://*.scdn.co https://*.spotifycdn.com https://*.qobuz.com https://www.gstatic.com; media-src 'self' https://*.dzcdn.net https://*.deezer.com https://*.akamaized.net https://*.qobuz.com"
+          "default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src 'self' https://www.google.com; connect-src 'self' http://127.0.0.1:* http://localhost:* https://api.deezer.com https://*.dzcdn.net https://*.deezer.com https://api.github.com https://www.google.com; img-src 'self' data: https://*.dzcdn.net https://*.deezer.com https://*.scdn.co https://*.spotifycdn.com https://*.qobuz.com https://*.mzstatic.com https://*.ytimg.com https://www.gstatic.com; media-src 'self' blob: http://127.0.0.1:* https://*.dzcdn.net https://*.deezer.com https://*.akamaized.net https://*.qobuz.com; worker-src 'self' blob:"
         ]
       }
     })
@@ -645,6 +645,16 @@ ipcMain.handle('window:close', () => {
 
 ipcMain.handle('window:isMaximized', () => {
   return mainWindow?.isMaximized()
+})
+
+ipcMain.handle('dialog:selectFile', async (_, opts?: { title?: string; extensions?: string[]; defaultPath?: string }) => {
+  const result = await dialog.showOpenDialog(mainWindow!, {
+    title: opts?.title,
+    defaultPath: opts?.defaultPath,
+    properties: ['openFile'],
+    filters: opts?.extensions?.length ? [{ name: opts.extensions.join(', ').toUpperCase(), extensions: opts.extensions }] : undefined
+  })
+  return result.filePaths[0] || null
 })
 
 ipcMain.handle('dialog:selectFolder', async (_, defaultPath?: string) => {

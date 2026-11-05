@@ -656,6 +656,7 @@ async function importFromDeezer() {
       <div v-if="sortedTracks.length > 0" class="space-y-1">
         <TrackCard
           v-for="track in visibleTracks"
+            :queue="visibleTracks"
           :key="track.id"
           :track="track"
         />

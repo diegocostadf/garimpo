@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.0] - 2026-11-05
+
+### Added
+- Player de prévia flutuante: arrastável para qualquer canto, barra de posição para avançar e voltar, volume, anterior e próxima, e VU meter estéreo que reage ao áudio.
+- Converter: traz playlists do Spotify, Apple Music, YouTube Music, TIM Music e Deezer, ou uma lista colada (texto ou CSV), encontra cada música no catálogo e baixa tudo.
+- Estúdio DJ: análise local de BPM, tom (Camelot) e energia de 1 a 10, gravados nos arquivos MP3 e FLAC.
+- Playlists DJ com ordenação por harmonia e por BPM, curva de energia e aviso de tom que não combina.
+- Envio para o Serato (crates) e para o Rekordbox (rekordbox xml), M3U para Engine DJ e djay Pro, e conversão Serato ↔ Rekordbox.
+
 ## [0.1.0] - 2026-11-04
 
 ### Added

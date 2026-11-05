@@ -516,7 +516,7 @@ const FLAC_FIELD_TO_KEY: Record<string, string> = {
   isrc: 'ISRC', year: 'YEAR', date: 'DATE', bpm: 'BPM', genre: 'GENRE',
   trackLength: 'LENGTH', explicitLyrics: 'EXPLICIT',
   albumBarcode: 'BARCODE', albumLabel: 'LABEL', replayGain: 'REPLAYGAIN_TRACK_GAIN',
-  copyright: 'COPYRIGHT'
+  copyright: 'COPYRIGHT', initialKey: 'INITIALKEY', energyLevel: 'ENERGYLEVEL'
 }
 
 function applyFlac(filePath: string, plan: PlannedField[], dryRun: boolean): { changes: TagChange[]; unchanged: string[] } {
@@ -812,4 +812,35 @@ export async function retagFileInFolder(filePath: string, folder: string, fields
   }
 
   return applyMergeFromMeta(filePath, meta, fields, dryRun)
+}
+
+// Writes the DJ analysis (tempo, key, energy) into the file so Serato,
+// Rekordbox and other software show it before their own analysis. MP3 gets
+// TBPM/TKEY plus a TXXX:ENERGYLEVEL frame; FLAC gets BPM/INITIALKEY/ENERGYLEVEL
+// Vorbis comments. Other formats are left untouched.
+export function writeDjTags(filePath: string, info: { bpm?: number; key?: string; energy?: number }): boolean {
+  const ext = path.extname(filePath).toLowerCase()
+  const bpm = info.bpm ? String(Math.round(info.bpm)) : ''
+  const energy = info.energy ? String(info.energy) : ''
+  if (ext === '.mp3') {
+    const tags: any = {}
+    if (bpm) tags.bpm = bpm
+    if (info.key) tags.initialKey = info.key
+    if (energy) {
+      const existing = NodeID3.read(filePath) || {}
+      const udt = (Array.isArray(existing.userDefinedText) ? existing.userDefinedText : []).filter((e: any) => e.description !== 'ENERGYLEVEL')
+      udt.push({ description: 'ENERGYLEVEL', value: energy })
+      tags.userDefinedText = udt
+    }
+    return NodeID3.update(tags, filePath) === true
+  }
+  if (ext === '.flac') {
+    const plan: PlannedField[] = []
+    if (bpm) plan.push({ field: 'bpm', value: bpm })
+    if (info.key) plan.push({ field: 'initialKey', value: info.key })
+    if (energy) plan.push({ field: 'energyLevel', value: energy })
+    applyFlac(filePath, plan, false)
+    return true
+  }
+  return false
 }

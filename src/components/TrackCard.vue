@@ -16,6 +16,7 @@ const props = withDefaults(defineProps<{
   track: Track
   index?: number
   showAlbum?: boolean
+  queue?: Track[]
 }>(), {
   showAlbum: true
 })
@@ -78,7 +79,7 @@ function toggleFavorite() {
 }
 
 function togglePlay() {
-  playerStore.play(props.track)
+  playerStore.play(props.track, props.queue)
 }
 
 // Qobuz-sourced tracks carry Qobuz ids — their artist/album pages load from the

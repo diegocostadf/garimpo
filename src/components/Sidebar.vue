@@ -45,6 +45,8 @@ const groups = computed(() => [
   {
     label: t('nav.groups.tools'),
     items: [
+      { path: '/convert', label: t('nav.convert') },
+      { path: '/dj', label: t('nav.dj') },
       { path: '/sync', label: t('nav.playlistSync') }
     ] as NavItem[]
   }

@@ -585,6 +585,7 @@ const contextMenuItems = computed(() => {
         <div class="space-y-1">
           <TrackCard
             v-for="(track, index) in topTracks.slice(0, 10)"
+            :queue="topTracks.slice(0, 10)"
             :key="track.id"
             :track="track"
             :index="index + 1"

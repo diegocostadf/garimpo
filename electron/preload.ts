@@ -12,6 +12,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Dialogs
   selectFolder: (defaultPath?: string) =>
     ipcRenderer.invoke('dialog:selectFolder', defaultPath),
+  selectFile: (opts?: { title?: string; extensions?: string[]; defaultPath?: string }) =>
+    ipcRenderer.invoke('dialog:selectFile', opts),
 
   // Shell
   openPath: (path: string) => ipcRenderer.invoke('shell:openPath', path),
@@ -172,6 +174,7 @@ declare global {
       close: () => Promise<void>
       isMaximized: () => Promise<boolean>
       selectFolder: (defaultPath?: string) => Promise<string | null>
+      selectFile: (opts?: { title?: string; extensions?: string[]; defaultPath?: string }) => Promise<string | null>
       openPath: (path: string) => Promise<void>
       openExternal: (url: string) => Promise<void>
       deletePath: (path: string) => Promise<void>

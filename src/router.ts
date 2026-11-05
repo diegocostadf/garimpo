@@ -34,6 +34,16 @@ const router = createRouter({
       component: () => import('./views/SyncView.vue')
     },
     {
+      path: '/convert',
+      name: 'convert',
+      component: () => import('./views/ConverterView.vue')
+    },
+    {
+      path: '/dj',
+      name: 'dj',
+      component: () => import('./views/DjView.vue')
+    },
+    {
       path: '/retag',
       name: 'retag',
       component: () => import('./views/RetagView.vue')

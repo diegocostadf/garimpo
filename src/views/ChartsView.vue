@@ -348,6 +348,7 @@ function getCountryFlag(code: string): string {
         <div class="space-y-1">
           <TrackCard
             v-for="(track, index) in charts.tracks"
+            :queue="charts.tracks"
             :key="track.id"
             :track="track"
             :index="index + 1"
