@@ -1,0 +1,301 @@
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import Sidebar from './components/Sidebar.vue'
+import TitleBar from './components/TitleBar.vue'
+import DownloadBar from './components/DownloadBar.vue'
+import BrandMark from './components/BrandMark.vue'
+import ToastContainer from './components/ToastContainer.vue'
+import UpdateDialog from './components/UpdateDialog.vue'
+import KeyboardShortcutsModal from './components/KeyboardShortcutsModal.vue'
+import OfflineBanner from './components/OfflineBanner.vue'
+import { useDownloadStore } from './stores/downloadStore'
+import { textContainsHostUrl } from './utils/urlHost'
+import { useAuthStore } from './stores/authStore'
+import { useSettingsStore } from './stores/settingsStore'
+import { useProfileStore } from './stores/profileStore'
+import { useSyncStore } from './stores/syncStore'
+import { useFavoritesStore } from './stores/favoritesStore'
+import { useUpdateStore } from './stores/updateStore'
+import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+const router = useRouter()
+const downloadStore = useDownloadStore()
+const authStore = useAuthStore()
+const settingsStore = useSettingsStore()
+const profileStore = useProfileStore()
+const syncStore = useSyncStore()
+const favoritesStore = useFavoritesStore()
+const isLoading = ref(true)
+const loadingMessage = ref(t('app.loadingSettings'))
+const showAuthExpiredBanner = ref(false)
+
+// Update title bar with download progress
+watch(
+  () => ({
+    active: downloadStore.activeDownloads.length,
+    downloads: downloadStore.downloads
+  }),
+  ({ active, downloads }) => {
+    if (active > 0) {
+      const totalProgress = downloads
+        .filter(d => d.status === 'pending' || d.status === 'downloading')
+        .reduce((sum, d) => sum + (d.progress || 0), 0)
+      const avgProgress = Math.round(totalProgress / Math.max(active, 1))
+      document.title = t('app.windowTitleProgress', { progress: avgProgress })
+    } else {
+      document.title = 'Garimpo' // i18n-exempt
+    }
+  },
+  { deep: true }
+)
+
+// Watch for auth expiration and show banner
+watch(() => authStore.authExpired, (expired) => {
+  if (expired) {
+    showAuthExpiredBanner.value = true
+  }
+})
+
+function dismissAuthExpiredBanner() {
+  showAuthExpiredBanner.value = false
+  authStore.clearAuthExpired()
+}
+
+function goToLogin() {
+  showAuthExpiredBanner.value = false
+  authStore.clearAuthExpired()
+  router.push('/settings')
+}
+
+// Register global keyboard shortcuts
+const { showShortcutsHelp } = useKeyboardShortcuts()
+
+// Ensure settings are saved before app closes
+const handleBeforeUnload = () => {
+  // Trigger a synchronous save attempt
+  settingsStore.saveSettings()
+  // Flush the debounced downloads save synchronously — rows created within the
+  // last ~1s (e.g. a just-clicked retry) are otherwise lost if the app closes
+  // inside the debounce window, leaving finished files with no queue record.
+  downloadStore.saveDownloadsImmediate()
+  // Optionally clear the download queue on close (off by default)
+  if (settingsStore.settings.clearQueueOnClose) {
+    downloadStore.clearAll()
+  }
+}
+
+onMounted(async () => {
+  console.log('[App] Starting initialization...')
+
+  // Initialize stores - settings must load first since auth depends on saved ARL
+  loadingMessage.value = t('app.loadingSettings')
+  await settingsStore.loadSettings()
+  console.log('[App] Settings loaded')
+
+  // Load profiles after settings
+  await profileStore.loadProfiles()
+  console.log('[App] Profiles loaded')
+
+  // Initialize sync store (non-blocking, after settings)
+  syncStore.init().then(() => console.log('[App] Sync store initialized'))
+    .catch((e: any) => console.warn('[App] Sync store init failed:', e.message))
+
+  // Now initialize remaining stores
+  loadingMessage.value = t('app.connectingDeezer')
+  await downloadStore.init()
+  console.log('[App] Download store initialized')
+
+  // Auth initialization with timeout - don't block app loading if Deezer is unreachable
+  loadingMessage.value = t('app.authenticating')
+  const authTimeout = 10000 // 10 second timeout for auth
+  try {
+    await Promise.race([
+      authStore.init(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Auth timeout')), authTimeout)
+      )
+    ])
+    console.log('[App] Auth initialized, isAuthenticated:', authStore.isAuthenticated)
+  } catch (e: any) {
+    console.warn('[App] Auth initialization failed or timed out:', e.message)
+    // App continues to load - user can try logging in manually
+  }
+
+  // Opt-in: auto-resume downloads interrupted by the app closing (#98). Runs
+  // once EITHER service session is restored — per-row service eligibility is
+  // enforced inside resumeInterruptedDownloads (a Deezer row won't retry
+  // without Deezer auth, a Qobuz row won't retry without the Qobuz session).
+  // If both are unavailable, interrupted items stay one-click-retryable.
+  if (authStore.isLoggedIn || settingsStore.isQobuzConnected) {
+    try {
+      await downloadStore.resumeInterruptedDownloads()
+    } catch (e: any) {
+      console.warn('[App] Failed to auto-resume interrupted downloads:', e.message)
+    }
+  }
+
+  // Load favorites (will work even without auth - just shows empty state)
+  loadingMessage.value = t('app.loadingFavorites')
+  try {
+    await favoritesStore.loadFavorites()
+    console.log('[App] Favorites loaded')
+  } catch (e: any) {
+    console.warn('[App] Failed to load favorites:', e.message)
+  }
+
+  // Global paste handler — detect Deezer links pasted anywhere and route to Search
+  window.addEventListener('paste', handleGlobalPaste)
+
+  // Add beforeunload handler to save settings on close
+  window.addEventListener('beforeunload', handleBeforeUnload)
+
+  isLoading.value = false
+  console.log('[App] Initialization complete')
+
+  // Non-blocking: start the update schedule; the main process does the checking
+  const updateStore = useUpdateStore()
+  await updateStore.init()
+  watch(() => settingsStore.settings.updateCheckEvery, (every) => updateStore.setSchedule(every), { immediate: true })
+})
+
+function handleGlobalPaste(e: ClipboardEvent) {
+  // Skip if user is typing in an input field (let the input handle it)
+  const target = e.target as HTMLElement
+  if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable) return
+
+  const text = e.clipboardData?.getData('text') || ''
+
+  // Check for share links and Spotify URLs — route to Link Analyzer for resolution.
+  // Deezer side stays narrow (share/short links only, NOT bare deezer.com) to
+  // preserve the prior global-paste behavior; matched by host, not substring.
+  if (textContainsHostUrl(text, ['link.deezer.com', 'deezer.page.link', 'open.spotify.com', 'link.spotify.com', 'spotify.link']) ||
+      text.startsWith('spotify:')) {
+    e.preventDefault()
+    router.push({ path: '/analyzer', query: { url: text.trim() } })
+    return
+  }
+
+  // Check for standard Deezer URLs — route to Search for bulk download
+  const deezerPattern = /(?:https?:\/\/)?(?:www\.)?deezer\.com(?:\/[a-z]{2})?\/(track|album|artist|playlist)\/(\d+)/gi
+  const links = text.match(deezerPattern)
+  if (links && links.length > 0) {
+    e.preventDefault()
+    router.push({ path: '/search', query: { paste: text } })
+  }
+}
+
+onBeforeUnmount(() => {
+  window.removeEventListener('paste', handleGlobalPaste)
+  window.removeEventListener('beforeunload', handleBeforeUnload)
+})
+</script>
+
+<template>
+  <div class="flex flex-col h-screen bg-background-main text-foreground">
+    <!-- Toast Notifications -->
+    <ToastContainer />
+    <UpdateDialog />
+
+    <!-- Offline Status Banner -->
+    <OfflineBanner />
+
+    <!-- Keyboard Shortcuts Help Modal -->
+    <KeyboardShortcutsModal
+      :show="showShortcutsHelp"
+      @close="showShortcutsHelp = false"
+    />
+
+    <!-- Title Bar (for frameless window) -->
+    <TitleBar />
+
+    <!-- Loading Screen -->
+    <div v-if="isLoading" class="flex-1 flex items-center justify-center">
+      <div class="text-center">
+        <BrandMark class="w-14 h-14 mx-auto mb-4 animate-pulse" />
+        <p class="text-foreground-muted">{{ loadingMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Auth Expired Banner -->
+    <transition name="slide-down">
+      <div
+        v-if="showAuthExpiredBanner"
+        class="bg-red-600 text-white px-4 py-3 flex items-center justify-between z-50"
+      >
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span class="font-medium">{{ t('login.sessionExpiredDownloading') }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            @click="goToLogin"
+            class="px-3 py-1 bg-white text-red-600 rounded-md text-sm font-medium hover:bg-red-50 transition-colors"
+          >
+            {{ t('login.logIn') }}
+          </button>
+          <button
+            @click="dismissAuthExpiredBanner"
+            class="p-1 hover:bg-red-700 rounded transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Main App (only shown after loading) -->
+    <div v-if="!isLoading" class="flex flex-1 overflow-hidden">
+      <!-- Sidebar Navigation -->
+      <Sidebar />
+
+      <!-- Main Content -->
+      <main class="flex-1 overflow-hidden flex flex-col">
+        <div class="flex-1 overflow-y-auto px-10 py-8">
+          <router-view v-slot="{ Component }">
+            <transition name="fade" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
+        </div>
+
+        <!-- Download Progress Bar (bottom bar for active download feedback) -->
+        <DownloadBar v-if="downloadStore.activeDownloads.length > 0" />
+      </main>
+
+      <!-- The old right-hand Transfer Rack is gone: the queue lives on the
+           Downloads page and the sidebar badge shows how many are running. -->
+    </div>
+
+  </div>
+</template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+</style>

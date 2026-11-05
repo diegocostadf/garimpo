@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Least-privilege token: this workflow only needs to read the repo.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Typecheck & build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        # Pinned to a commit rather than the moving v2 tag: whoever controls
+        # that tag would otherwise control what runs in CI. v2 resolves to this
+        # same commit today, so the pin changes nothing about what executes.
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Localization parity and hard-coded string check
+        run: bun scripts/i18n-check.ts
+
+      - name: Build renderer
+        run: bun run build:vite

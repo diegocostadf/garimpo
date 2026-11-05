@@ -1,0 +1,529 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Background colors - Dark mode (default) */
+    --bg-main: 18 18 22;
+    --bg-secondary: 26 26 31;
+    --bg-tertiary: 36 36 41;
+
+    /* Foreground colors - Dark mode (default) */
+    --fg-default: 237 237 237;
+    --fg-muted: 161 161 170;
+
+    /* Default theme: Violet */
+    --primary-50: 245 243 255;
+    --primary-100: 237 233 254;
+    --primary-200: 221 214 254;
+    --primary-300: 196 181 253;
+    --primary-400: 167 139 250;
+    --primary-500: 139 92 246;
+    --primary-600: 124 58 237;
+    --primary-700: 109 40 217;
+    --primary-800: 91 33 182;
+    --primary-900: 76 29 149;
+
+    /* Logo gradient colors */
+    --logo-start: #8B5CF6;
+    --logo-mid: #6366F1;
+    --logo-end: #3B82F6;
+
+    /* Surface tokens. Dark defaults; light mode overrides. */
+    --surface: 27 26 24;
+    --line: 44 42 39;
+    --line-strong: 62 59 55;
+    --hover: 38 36 31;
+  }
+
+  /* ── Garimpo (default theme) ──
+     Warm off-white paper with one moss-green accent in light mode; warm
+     near-black with a lifted green in dark mode. Every pair below clears
+     WCAG AA for body text against --bg-main, --bg-secondary and --surface. */
+  [data-theme="garimpo"] {
+    --bg-main: 20 18 14;
+    --bg-secondary: 24 22 18;
+    --bg-tertiary: 40 37 30;
+    --surface: 30 27 22;
+    --line: 48 44 37;
+    --line-strong: 66 61 52;
+    --hover: 40 37 30;
+    --fg-default: 244 240 232;
+    --fg-muted: 168 160 148;
+    --primary-50: 40 30 10;
+    --primary-100: 64 46 12;
+    --primary-200: 100 72 20;
+    --primary-300: 160 115 35;
+    --primary-400: 205 150 55;
+    --primary-500: 229 176 74;
+    --primary-600: 236 192 106;
+    --primary-700: 242 208 140;
+    --primary-800: 247 226 180;
+    --primary-900: 251 242 218;
+    --logo-start: #E5B04A;
+    --logo-mid: #E5B04A;
+    --logo-end: #E5B04A;
+  }
+  [data-mode="light"][data-theme="garimpo"] {
+    --bg-main: 247 244 238;
+    --bg-secondary: 251 249 245;
+    --bg-tertiary: 239 235 227;
+    --surface: 255 255 255;
+    --line: 231 225 214;
+    --line-strong: 214 206 192;
+    --hover: 239 235 227;
+    --fg-default: 28 25 19;
+    --fg-muted: 106 98 87;
+    --primary-50: 250 241 222;
+    --primary-100: 243 226 189;
+    --primary-200: 232 201 137;
+    --primary-300: 214 166 76;
+    --primary-400: 184 128 20;
+    --primary-500: 153 99 0;
+    --primary-600: 128 82 0;
+    --primary-700: 104 67 0;
+    --primary-800: 82 53 0;
+    --primary-900: 61 39 0;
+    --logo-start: #996300;
+    --logo-mid: #996300;
+    --logo-end: #996300;
+  }
+
+  /* Violet Theme (Default) */
+  [data-theme="violet"] {
+    --primary-50: 245 243 255;
+    --primary-100: 237 233 254;
+    --primary-200: 221 214 254;
+    --primary-300: 196 181 253;
+    --primary-400: 167 139 250;
+    --primary-500: 139 92 246;
+    --primary-600: 124 58 237;
+    --primary-700: 109 40 217;
+    --primary-800: 91 33 182;
+    --primary-900: 76 29 149;
+    --logo-start: #8B5CF6;
+    --logo-mid: #6366F1;
+    --logo-end: #3B82F6;
+  }
+
+  /* Spotify Theme - Green */
+  [data-theme="spotify"] {
+    --primary-50: 236 253 245;
+    --primary-100: 209 250 229;
+    --primary-200: 167 243 208;
+    --primary-300: 110 231 183;
+    --primary-400: 52 211 153;
+    --primary-500: 30 185 128;
+    --primary-600: 22 163 74;
+    --primary-700: 21 128 61;
+    --primary-800: 22 101 52;
+    --primary-900: 20 83 45;
+    --logo-start: #1DB954;
+    --logo-mid: #1ED760;
+    --logo-end: #17A34A;
+  }
+
+  /* Rose Theme - Pink */
+  [data-theme="rose"] {
+    --primary-50: 255 241 242;
+    --primary-100: 255 228 230;
+    --primary-200: 254 205 211;
+    --primary-300: 253 164 175;
+    --primary-400: 251 113 133;
+    --primary-500: 244 63 94;
+    --primary-600: 225 29 72;
+    --primary-700: 190 18 60;
+    --primary-800: 159 18 57;
+    --primary-900: 136 19 55;
+    --logo-start: #F43F5E;
+    --logo-mid: #EC4899;
+    --logo-end: #DB2777;
+  }
+
+  /* Ocean Theme - Blue */
+  [data-theme="ocean"] {
+    --primary-50: 239 246 255;
+    --primary-100: 219 234 254;
+    --primary-200: 191 219 254;
+    --primary-300: 147 197 253;
+    --primary-400: 96 165 250;
+    --primary-500: 59 130 246;
+    --primary-600: 37 99 235;
+    --primary-700: 29 78 216;
+    --primary-800: 30 64 175;
+    --primary-900: 30 58 138;
+    --logo-start: #3B82F6;
+    --logo-mid: #2563EB;
+    --logo-end: #1D4ED8;
+  }
+
+  /* Sunset Theme - Orange */
+  [data-theme="sunset"] {
+    --primary-50: 255 247 237;
+    --primary-100: 255 237 213;
+    --primary-200: 254 215 170;
+    --primary-300: 253 186 116;
+    --primary-400: 251 146 60;
+    --primary-500: 249 115 22;
+    --primary-600: 234 88 12;
+    --primary-700: 194 65 12;
+    --primary-800: 154 52 18;
+    --primary-900: 124 45 18;
+    --logo-start: #F97316;
+    --logo-mid: #EA580C;
+    --logo-end: #DC2626;
+  }
+
+  /* Mint Theme - Teal/Cyan */
+  [data-theme="mint"] {
+    --primary-50: 236 254 255;
+    --primary-100: 207 250 254;
+    --primary-200: 165 243 252;
+    --primary-300: 103 232 249;
+    --primary-400: 34 211 238;
+    --primary-500: 6 182 212;
+    --primary-600: 8 145 178;
+    --primary-700: 14 116 144;
+    --primary-800: 21 94 117;
+    --primary-900: 22 78 99;
+    --logo-start: #06B6D4;
+    --logo-mid: #14B8A6;
+    --logo-end: #0D9488;
+  }
+
+  /* Dracula Theme - Purple/Pink Dark */
+  [data-theme="dracula"] {
+    --bg-main: 40 42 54;
+    --bg-secondary: 48 51 65;
+    --bg-tertiary: 59 62 77;
+    /* Dracula's surfaces are lighter than the default dark ones, so the
+       inherited 161 161 170 only reached 4.13:1 on --bg-tertiary. Lifted just
+       enough to clear AA on all three (worst case 4.54:1); every other dark
+       theme keeps the inherited value, which already passes comfortably. */
+    --fg-muted: 169 169 177;
+    --primary-50: 255 243 255;
+    --primary-100: 250 232 255;
+    --primary-200: 245 208 254;
+    --primary-300: 240 171 252;
+    --primary-400: 232 121 249;
+    --primary-500: 189 147 249;
+    --primary-600: 255 121 198;
+    --primary-700: 139 233 253;
+    --primary-800: 80 250 123;
+    --primary-900: 241 250 140;
+    --logo-start: #BD93F9;
+    --logo-mid: #FF79C6;
+    --logo-end: #8BE9FD;
+  }
+
+  /* Nord Theme - Blue/Grey */
+  [data-theme="nord"] {
+    --bg-main: 46 52 64;
+    --bg-secondary: 59 66 82;
+    --bg-tertiary: 67 76 94;
+    --fg-default: 236 239 244;
+    --fg-muted: 216 222 233;
+    --primary-50: 236 239 244;
+    --primary-100: 229 233 240;
+    --primary-200: 216 222 233;
+    --primary-300: 136 192 208;
+    --primary-400: 129 161 193;
+    --primary-500: 94 129 172;
+    --primary-600: 136 192 208;
+    --primary-700: 143 188 187;
+    --primary-800: 163 190 140;
+    --primary-900: 180 142 173;
+    --logo-start: #5E81AC;
+    --logo-mid: #81A1C1;
+    --logo-end: #88C0D0;
+  }
+
+  /* Signal Theme - v2 "Signal Deck" acid chartreuse on blue-black */
+  [data-theme="signal"] {
+    --bg-main: 10 14 18;
+    --bg-secondary: 14 20 27;
+    --bg-tertiary: 19 27 36;
+    --fg-default: 215 225 232;
+    --fg-muted: 124 139 152;
+    --primary-50: 250 254 232;
+    --primary-100: 242 252 203;
+    --primary-200: 229 248 154;
+    --primary-300: 214 243 100;
+    --primary-400: 213 245 93;
+    --primary-500: 200 241 53;
+    --primary-600: 143 174 36;
+    --primary-700: 110 135 27;
+    --primary-800: 84 104 22;
+    --primary-900: 60 75 16;
+    --logo-start: #C8F135;
+    --logo-mid: #8FAE24;
+    --logo-end: #59C2D6;
+  }
+
+  /* Light Mode */
+  [data-mode="light"] {
+    --bg-main: 250 250 252;
+    --bg-secondary: 243 244 246;
+    --bg-tertiary: 229 231 235;
+    --fg-default: 24 24 27;
+    /* Was 113 113 122, which measured 3.90:1 on --bg-tertiary and 4.39:1 on
+       --bg-secondary: under the 4.5:1 AA minimum on both, before any opacity
+       modifier was applied. Darkened to the nearest value along the same hue
+       that clears AA on all three surfaces (worst case 4.52:1). */
+    --fg-muted: 103 103 112;
+    --surface: 255 255 255;
+    --line: 229 231 235;
+    --line-strong: 209 213 219;
+    --hover: 238 239 242;
+  }
+
+  /* Light-mode Signal: chartreuse #C8F135 is unreadable as text on white, so
+     the accent range shifts to its pressed-ink olive family. Paper-console
+     look; the CRT/vignette overlays are separately disabled in light mode. */
+  [data-mode="light"][data-theme="signal"] {
+    --bg-main: 246 247 243;
+    --bg-secondary: 238 240 232;
+    --bg-tertiary: 226 229 218;
+    --fg-default: 26 31 24;
+    /* Was 106 115 100 (3.87:1 on --bg-tertiary). See the note in the shared
+       light-mode block; same fix, olive hue preserved. Worst case now 4.53:1. */
+    --fg-muted: 96 104 91;
+    --primary-300: 143 174 36;
+    --primary-400: 122 148 30;
+    --primary-500: 101 123 25;
+    --primary-600: 84 104 22;
+    --primary-700: 68 84 18;
+  }
+
+  /* Light mode adjustments for specific themes */
+  [data-mode="light"][data-theme="nord"] {
+    --bg-main: 236 239 244;
+    --bg-secondary: 229 233 240;
+    --bg-tertiary: 216 222 233;
+    --fg-default: 46 52 64;
+    --fg-muted: 76 86 106;
+  }
+
+  /* Logo gradient classes for SVG */
+  .logo-gradient-start {
+    stop-color: var(--logo-start);
+  }
+  .logo-gradient-mid {
+    stop-color: var(--logo-mid);
+  }
+  .logo-gradient-end {
+    stop-color: var(--logo-end);
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-xl font-medium transition-all duration-200;
+    min-height: 40px;
+  }
+
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white;
+  }
+
+  /* Chartreuse needs dark text for contrast (WCAG) */
+  [data-theme="signal"] .btn-primary {
+    color: rgb(10 14 18);
+  }
+
+  /* ...and light-mode Signal flips to dark-olive buttons, so text goes paper */
+  [data-mode="light"][data-theme="signal"] .btn-primary {
+    color: rgb(246 247 243);
+  }
+
+  /* Signal is a hard-edged console — no rounded buttons/inputs/cards */
+  [data-theme="signal"] .btn,
+  [data-theme="signal"] .input {
+    border-radius: 0;
+  }
+
+  [data-theme="signal"] .card {
+    border-radius: 0;
+    border: 1px solid rgb(255 255 255 / 0.07);
+  }
+
+  .btn-secondary {
+    @apply bg-surface border border-line hover:bg-hover text-foreground;
+  }
+
+  .btn-ghost {
+    @apply hover:bg-hover text-foreground;
+  }
+
+  .input {
+    @apply w-full px-4 py-2 bg-surface border border-line rounded-xl
+           text-foreground placeholder-foreground-muted
+           focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500
+           transition-all duration-200;
+    min-height: 44px;
+  }
+
+  .card {
+    @apply bg-surface border border-line rounded-card p-4;
+  }
+}
+
+/* Custom animations */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Drag region for frameless window */
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Performance optimizations for smooth scrolling */
+@layer base {
+  /* Enable smooth momentum scrolling on touch devices */
+  .overflow-y-auto,
+  .overflow-x-auto,
+  .overflow-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Optimize list items for better paint performance */
+  .download-item,
+  .track-card,
+  .album-card,
+  .artist-card {
+    contain: layout style paint;
+  }
+
+  /* Grid containers use content-visibility for virtualization-like behavior */
+  .grid {
+    contain: layout style;
+  }
+
+  /* Reduce paint on progress bars - use GPU layer */
+  .progress-bar {
+    will-change: width;
+  }
+
+  /* Spinner optimization - GPU acceleration without breaking rotation */
+  .spinner,
+  .animate-spin {
+    will-change: transform;
+    /* backface-visibility triggers GPU compositing layer */
+    backface-visibility: hidden;
+  }
+
+  /* Lazy load offscreen images with intrinsic size hint */
+  img {
+    content-visibility: auto;
+  }
+
+  /* Optimize hover transitions - promote to GPU layer only on hover */
+  .group:hover img {
+    will-change: transform, box-shadow;
+  }
+
+  /* Reduce layout thrashing during downloads view updates */
+  .space-y-1 > *,
+  .space-y-2 > * {
+    contain: layout style;
+  }
+}
+
+/* ── Signal Deck atmosphere ──
+   Scanline + vignette overlays rendered by App.vue (.theme-crt / .theme-vig).
+   Hidden by default; only the Signal theme switches them on. Toned down from
+   the mockup (0.35 → 0.16) so long sessions stay comfortable. */
+.theme-crt,
+.theme-vig {
+  display: none;
+}
+[data-theme="signal"] .theme-crt {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.14) 0 1px, transparent 1px 3px);
+  opacity: 0.16;
+}
+[data-theme="signal"] .theme-vig {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+  pointer-events: none;
+  background: radial-gradient(120% 100% at 50% 40%, transparent 62%, rgba(0, 0, 0, 0.38));
+}
+/* Light mode never gets the CRT treatment, whatever the theme setting */
+[data-mode="light"] .theme-crt,
+[data-mode="light"] .theme-vig {
+  display: none;
+}
+
+/* ── Garimpo type and shape ──
+   The inherited views were written for a console look: tiny uppercase mono
+   labels, wide tracking, square corners. These rules calm all of it down in
+   one place so every screen reads as one product. */
+body {
+  font-family: 'Geist Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.uppercase { text-transform: none; }
+.tracking-wide, .tracking-wider, .tracking-widest,
+[class*="tracking-["] { letter-spacing: normal; }
+.font-display { font-weight: 600; letter-spacing: -0.02em; }
+.font-mono.uppercase { font-family: 'Geist Sans', system-ui, sans-serif; font-weight: 500; }
+.text-\[8px\], .text-\[8\.5px\], .text-\[9px\], .text-\[9\.5px\],
+.text-\[10px\], .text-\[10\.5px\] { font-size: 12px; line-height: 1.4; }
+.text-\[11px\], .text-\[11\.5px\] { font-size: 12.5px; }
+.rounded-sm, .rounded-\[1px\], .rounded-\[2px\] { border-radius: 6px; }
+/* Light accents need dark ink on filled primary surfaces in dark mode. */
+[data-mode="dark"][data-theme="garimpo"] .bg-primary-500.text-white,
+[data-mode="dark"][data-theme="garimpo"] .btn-primary { color: rgb(36 26 5); }
+::selection { background: rgb(var(--primary-500) / 0.25); }
+
+/* ── Garimpo: friendlier defaults for the inherited screens ──
+   Page titles get one consistent size, small console-style buttons become
+   comfortable rounded targets, and accent tints that were tuned for dark
+   backgrounds get readable shades in light mode. */
+h1.font-display { font-size: 32px; line-height: 1.15; }
+h2.font-display { font-size: 18px; }
+button.font-mono.uppercase,
+a.font-mono.uppercase {
+  min-height: 40px;
+  border-radius: 10px;
+  padding-inline: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+}
+[data-mode="light"] .text-primary-300,
+[data-mode="light"] .text-primary-400 { color: rgb(var(--primary-500)); }
+[data-mode="light"] .text-green-300,
+[data-mode="light"] .text-green-400 { color: rgb(21 128 61); }
+[data-mode="light"] .text-red-300,
+[data-mode="light"] .text-red-400 { color: rgb(185 28 28); }
+[data-mode="light"] .text-amber-300,
+[data-mode="light"] .text-amber-400,
+[data-mode="light"] .text-yellow-400 { color: rgb(146 84 0); }
+[data-mode="light"] .text-blue-400 { color: rgb(29 78 216); }
+[data-mode="light"] .text-qobuz-400,
+[data-mode="light"] .text-qobuz-500 { color: rgb(14 116 144); }

@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-electron/
+release/
+*.tsbuildinfo
+
+# Environment & secrets
+.env
+.env.*
+*.pem
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# Logs
+*.log
+npm-debug.log*
+CONVERSATION_LOG*
+
+# Cache
+.cache/
+.tmp/
+
+# Internal planning + AI memory (not for public repo)
+Plans/
+MEMORY/
+
+.build-logs/
+
+# Interceptor capture intermediates (screenshot tooling)
+interceptor-screenshot-*
+release-shipped*/
