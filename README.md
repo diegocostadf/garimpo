@@ -32,9 +32,9 @@ bun run build:linux         # AppImage e .deb
 
 O build local para Mac sai em `release/mac-arm64/Garimpo.app`. Como não é assinado, na primeira vez abra com clique direito e **Abrir**.
 
-## Antes de publicar
+## Atualizações
 
-Troque `SEU-USUARIO/garimpo` pelo seu repositório em `package.json` (`build.publish`), `electron/appUpdate.ts`, `electron/updatePlan.ts` e `src/views/AboutView.vue`. É de lá que o app busca atualizações.
+O app procura novas versões nas releases de `github.com/diegocostadf/garimpo`.
 
 ## Licença
 

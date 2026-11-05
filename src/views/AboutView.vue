@@ -9,7 +9,7 @@ import changelogRaw from '../../CHANGELOG.md?raw'
 const { t } = useI18n()
 
 // Point these at your own repository before publishing.
-const REPO_URL = 'https://github.com/SEU-USUARIO/garimpo'
+const REPO_URL = 'https://github.com/diegocostadf/garimpo'
 
 const appVersion = ref('')
 const runtimeInfo = ref<{ electron: string; chromium: string; node: string; v8: string; os: string } | null>(null)

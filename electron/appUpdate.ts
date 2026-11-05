@@ -35,7 +35,7 @@ export interface UpdateStatus {
 }
 
 // Point this at your own fork's GitHub repo so update checks find your releases.
-const REPO = 'SEU-USUARIO/garimpo'
+const REPO = 'diegocostadf/garimpo'
 const RELEASE_URL = `https://github.com/${REPO}/releases/latest`
 const SCHEDULE_MS: Record<UpdateSchedule, number> = {
   hour: 60 * 60_000,

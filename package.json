@@ -126,7 +126,7 @@
     "afterAllArtifactBuild": "scripts/after-all-artifacts.cjs",
     "publish": {
       "provider": "github",
-      "owner": "SEU-USUARIO",
+      "owner": "diegocostadf",
       "repo": "garimpo"
     }
   }

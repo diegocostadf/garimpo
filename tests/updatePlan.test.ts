@@ -37,7 +37,7 @@ describe('newer', () => {
 })
 
 describe('portable self-update', () => {
-  const url = (n: string) => `https://github.com/SEU-USUARIO/garimpo/releases/download/v2.6.6/${n}`
+  const url = (n: string) => `https://github.com/diegocostadf/garimpo/releases/download/v2.6.6/${n}`
   const assets = ['Garimpo-Portable-2.6.6-x64.exe', 'Garimpo-Portable-2.6.6-arm64.exe', 'Garimpo-Setup-2.6.6-x64.exe'].map((name) => ({ name, browser_download_url: url(name) }))
   test('picks this architecture', () => {
     expect(portableAsset(assets, 'x64')?.name).toBe('Garimpo-Portable-2.6.6-x64.exe')

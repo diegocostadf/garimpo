@@ -73,8 +73,8 @@ export interface ReleaseAsset {
   size?: number
 }
 
-/** Releases are published from github.com/SEU-USUARIO/garimpo only; anything else is refused before download. */
-export const RELEASE_DOWNLOAD_PREFIX = 'https://github.com/SEU-USUARIO/garimpo/releases/download/'
+/** Releases are published from github.com/diegocostadf/garimpo only; anything else is refused before download. */
+export const RELEASE_DOWNLOAD_PREFIX = 'https://github.com/diegocostadf/garimpo/releases/download/'
 
 /** The portable exe for this architecture in a release (GitHub turns the space in its name into a dot). */
 export function portableAsset(assets: ReleaseAsset[], arch: string): ReleaseAsset | null {
