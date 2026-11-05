@@ -35,19 +35,31 @@ if [ "$RUN" = "bun" ]; then bun install; else npm install --no-audit --no-fund; 
 
 echo ""
 echo "2/3  Compilando o app..."
-rm -rf dist dist-electron release
+# Pastas sincronizadas com o iCloud (como Documentos) colam metadados ocultos
+# nos arquivos, e a assinatura do macOS recusa o app. Por isso a compilação
+# acontece numa pasta fora do iCloud.
+OUT="$HOME/Library/Caches/garimpo-build"
+rm -rf dist dist-electron release "$OUT"
 npx vite build
-CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac dir --arm64 -c.mac.notarize=false
+xattr -cr dist dist-electron public 2>/dev/null || true
+CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac dir --arm64 \
+  -c.mac.notarize=false -c.directories.output="$OUT"
 
-APP="release/mac-arm64/Garimpo.app"
-if [ ! -d "$APP" ]; then
-  echo "A compilação terminou sem gerar $APP. Veja as mensagens acima."
+BUILT="$OUT/mac-arm64/Garimpo.app"
+if [ ! -d "$BUILT" ]; then
+  echo "A compilação terminou sem gerar o app. Veja as mensagens acima."
   read -n 1 -s -r -p "Pressione qualquer tecla para fechar."
   exit 1
 fi
 
 echo ""
-echo "3/3  Pronto! O app está em: $(pwd)/$APP"
-echo "     Para deixá-lo junto dos outros apps, arraste Garimpo.app para a pasta Aplicativos."
+echo "3/3  Instalando em ~/Applications..."
+mkdir -p "$HOME/Applications"
+rm -rf "$HOME/Applications/Garimpo.app"
+ditto --norsrc "$BUILT" "$HOME/Applications/Garimpo.app"
+rm -rf "$OUT"
+
 echo ""
-open "$APP"
+echo "Pronto! O Garimpo está na sua pasta Aplicativos pessoal (~/Applications)."
+echo ""
+open "$HOME/Applications/Garimpo.app"

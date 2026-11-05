@@ -16,7 +16,7 @@ Garimpo é um app de desktop para Mac, Windows e Linux. Você busca faixas, álb
 
 ## Instalar no Mac
 
-Dê dois cliques em **Instalar Garimpo.command**. Ele instala as dependências, compila o app para Apple Silicon e abre o Garimpo. Precisa do [Node.js](https://nodejs.org) ou do [Bun](https://bun.sh) instalado. Se o macOS bloquear o arquivo na primeira vez, clique com o botão direito nele e escolha **Abrir**.
+Dê dois cliques em **Instalar Garimpo.command**. Ele instala as dependências, compila o app para Apple Silicon, instala em `~/Applications` e abre o Garimpo. Precisa do [Node.js](https://nodejs.org) ou do [Bun](https://bun.sh) instalado. Se o macOS bloquear o arquivo na primeira vez, clique com o botão direito nele e escolha **Abrir**.
 
 ## Rodando a partir do código
 
@@ -30,7 +30,7 @@ bun run build:win           # instalador para Windows
 bun run build:linux         # AppImage e .deb
 ```
 
-O build local para Mac sai em `release/mac-arm64/Garimpo.app`. Como não é assinado, na primeira vez abra com clique direito e **Abrir**.
+Se o projeto estiver numa pasta sincronizada com o iCloud (como Documentos), use o `Instalar Garimpo.command`: ele compila fora do iCloud, porque os metadados que o iCloud adiciona fazem a assinatura do macOS falhar.
 
 ## Atualizações
 
