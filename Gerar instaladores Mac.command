@@ -50,7 +50,7 @@ node scripts/write-update-feeds.mjs || true
 VERSION=$(node -p "require('./package.json').version")
 PKG="$(cd .. && pwd)/Pacote Garimpo $VERSION/mac"
 mkdir -p "$PKG"
-cp "$DEST"/*.dmg "$DEST"/*.zip "$DEST"/latest-mac.yml "$PKG"/ 2>/dev/null || true
+cp "$DEST"/*-"$VERSION"-*.dmg "$DEST"/*-"$VERSION"-*.zip "$DEST"/latest-mac.yml "$PKG"/ 2>/dev/null || true
 echo ""
 echo "Pronto! Instaladores em: $PKG"
 open "$PKG"
